@@ -310,7 +310,7 @@ function drawGauge(score, color) {
         // Background track
         ctx.beginPath();
         ctx.arc(cx, cy, radius, startAngle, startAngle + totalAngle);
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.06)";
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
         ctx.lineWidth = lineWidth;
         ctx.lineCap = "round";
         ctx.stroke();
@@ -319,6 +319,12 @@ function drawGauge(score, color) {
         if (currentAngle > 0) {
             ctx.beginPath();
             ctx.arc(cx, cy, radius, startAngle, startAngle + currentAngle);
+
+            // Gradient
+            const grad = ctx.createLinearGradient(0, 0, size, size);
+            grad.addColorStop(0, "#22c55e");
+            grad.addColorStop(0.5, "#f59e0b");
+            grad.addColorStop(1, "#ef4444");
             ctx.strokeStyle = color;
             ctx.lineWidth = lineWidth;
             ctx.lineCap = "round";
@@ -326,7 +332,7 @@ function drawGauge(score, color) {
 
             // Glow
             ctx.shadowColor = color;
-            ctx.shadowBlur = 12;
+            ctx.shadowBlur = 15;
             ctx.stroke();
             ctx.shadowBlur = 0;
         }
@@ -339,7 +345,7 @@ function drawGauge(score, color) {
             ctx.beginPath();
             ctx.moveTo(cx + innerR * Math.cos(angle), cy + innerR * Math.sin(angle));
             ctx.lineTo(cx + outerR * Math.cos(angle), cy + outerR * Math.sin(angle));
-            ctx.strokeStyle = "rgba(0,0,0,0.1)";
+            ctx.strokeStyle = "rgba(255,255,255,0.15)";
             ctx.lineWidth = i % 5 === 0 ? 2 : 1;
             ctx.stroke();
         }
@@ -422,8 +428,8 @@ function renderFrequencyChart(profileData) {
                 {
                     label: "Radial Power",
                     data: profileData.map((d) => d.power),
-                    borderColor: "#8b6cc7",
-                    backgroundColor: "rgba(139, 108, 199, 0.1)",
+                    borderColor: "#818cf8",
+                    backgroundColor: "rgba(129, 140, 248, 0.1)",
                     borderWidth: 1.5,
                     fill: true,
                     tension: 0.3,
@@ -437,10 +443,10 @@ function renderFrequencyChart(profileData) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: "rgba(255,255,255,0.4)",
-                    titleColor: "#2a2430",
-                    bodyColor: "#524a5c",
-                    borderColor: "rgba(255,255,255,0.5)",
+                    backgroundColor: "#1a1a2e",
+                    titleColor: "#f0f0f5",
+                    bodyColor: "#8888a0",
+                    borderColor: "rgba(255,255,255,0.1)",
                     borderWidth: 1,
                 },
             },
@@ -452,18 +458,18 @@ function renderFrequencyChart(profileData) {
                         color: "#55556a",
                         font: { family: "'JetBrains Mono'", size: 10 },
                     },
-                    ticks: { color: "#847a8e", font: { size: 9 }, maxTicksLimit: 8 },
-                    grid: { color: "rgba(0,0,0,0.04)" },
+                    ticks: { color: "#55556a", font: { size: 9 }, maxTicksLimit: 8 },
+                    grid: { color: "rgba(255,255,255,0.03)" },
                 },
                 y: {
                     title: {
                         display: true,
                         text: "Normalized Power",
-                        color: "#847a8e",
+                        color: "#55556a",
                         font: { family: "'JetBrains Mono'", size: 10 },
                     },
-                    ticks: { color: "#847a8e", font: { size: 9 }, maxTicksLimit: 5 },
-                    grid: { color: "rgba(0,0,0,0.04)" },
+                    ticks: { color: "#55556a", font: { size: 9 }, maxTicksLimit: 5 },
+                    grid: { color: "rgba(255,255,255,0.03)" },
                 },
             },
         },
@@ -539,16 +545,16 @@ function setScoreBadge(element, score) {
     const pct = Math.round(score * 100);
     let color;
 
-    if (score < 0.3) color = "#4dd4ac";
-    else if (score < 0.5) color = "#84cc16";
-    else if (score < 0.65) color = "#e8a840";
-    else if (score < 0.8) color = "#e07ab5";
-    else color = "#e06070";
+    if (score < 0.3) color = "var(--green)";
+    else if (score < 0.5) color = "var(--lime)";
+    else if (score < 0.65) color = "var(--amber)";
+    else if (score < 0.8) color = "var(--orange)";
+    else color = "var(--red)";
 
     element.textContent = `${pct}%`;
     element.style.color = color;
-    element.style.background = `${color}18`;
-    element.style.border = `1px solid ${color}40`;
+    element.style.background = `${color}15`;
+    element.style.border = `1px solid ${color}33`;
 }
 
 function animateCount(element, from, to, duration) {
