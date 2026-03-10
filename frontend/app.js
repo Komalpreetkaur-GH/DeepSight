@@ -2,22 +2,22 @@
  * DeepSight — Deepfake Forensics Toolkit
  * Frontend Application Logic
  * ================================================
- * Handles file upload, API communication, results rendering,
- * and interactive visualizations.
+ * Features: single / batch analysis, PDF export,
+ * analysis history, and image comparison.
  */
 
 // ── DOM References ──────────────────────────────────────────────
-
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 const dom = {
-    // Sections
     hero: $("#hero-section"),
     scanning: $("#scanning-section"),
     results: $("#results-section"),
+    batchResults: $("#batch-results-section"),
+    historySection: $("#history-section"),
+    compareSection: $("#compare-section"),
 
-    // Upload
     uploadZone: $("#upload-zone"),
     fileInput: $("#file-input"),
     filePreview: $("#file-preview"),
@@ -26,6 +26,15 @@ const dom = {
     fileSize: $("#file-size"),
     analyzeBtn: $("#analyze-btn"),
     resetBtn: $("#reset-btn"),
+
+    // Batch
+    batchPreview: $("#batch-preview"),
+    batchThumbnails: $("#batch-thumbnails"),
+    batchCount: $("#batch-count"),
+    batchAnalyzeBtn: $("#batch-analyze-btn"),
+    batchResetBtn: $("#batch-reset-btn"),
+    batchGrid: $("#batch-grid"),
+    batchNewBtn: $("#batch-new-btn"),
 
     // Scanning
     scanImage: $("#scan-image"),
@@ -46,20 +55,16 @@ const dom = {
     cnnDescription: $("#cnn-description"),
     cnnGradcam: $("#cnn-gradcam"),
     cnnScoreBadge: $("#cnn-score-badge"),
-
     elaDescription: $("#ela-description"),
     elaHeatmap: $("#ela-heatmap"),
     elaScoreBadge: $("#ela-score-badge"),
-
     freqDescription: $("#freq-description"),
     freqSpectrum: $("#freq-spectrum"),
     freqChart: $("#freq-chart"),
     freqScoreBadge: $("#freq-score-badge"),
-
     noiseDescription: $("#noise-description"),
     noiseMap: $("#noise-map"),
     noiseScoreBadge: $("#noise-score-badge"),
-
     metaDescription: $("#meta-description"),
     metaFlags: $("#meta-flags"),
     metaDetails: $("#meta-details"),
@@ -67,91 +72,195 @@ const dom = {
 
     // Actions
     newAnalysisBtn: $("#new-analysis-btn"),
+    downloadPdfBtn: $("#download-pdf-btn"),
+
+    // Nav
+    navHistoryBtn: $("#nav-history-btn"),
+    navCompareBtn: $("#nav-compare-btn"),
+    historyCount: $("#history-count"),
+
+    // History
+    historyGrid: $("#history-grid"),
+    historyClearBtn: $("#history-clear-btn"),
+    historyCloseBtn: $("#history-close-btn"),
+    historyEmpty: $("#history-empty"),
+
+    // Compare
+    comparePickerA: $("#compare-picker-a"),
+    comparePickerB: $("#compare-picker-b"),
+    compareResultA: $("#compare-result-a"),
+    compareResultB: $("#compare-result-b"),
+    compareCloseBtn: $("#compare-close-btn"),
+    compareChartContainer: $("#compare-chart-container"),
+    compareChart: $("#compare-chart"),
 };
 
 // ── State ───────────────────────────────────────────────────────
-
 let selectedFile = null;
+let selectedFiles = [];
 let freqChartInstance = null;
+let compareChartInstance = null;
+let currentAnalysisData = null;
+let compareSlotTarget = null; // 'a' or 'b'
+let compareDataA = null;
+let compareDataB = null;
+
+const HISTORY_KEY = "deepsight_history";
+const MAX_HISTORY = 20;
+
+// ── History Manager ─────────────────────────────────────────────
+function getHistory() {
+    try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    } catch { return []; }
+}
+
+function saveToHistory(data, thumbnailDataUrl) {
+    const history = getHistory();
+    history.unshift({
+        id: Date.now().toString(),
+        filename: data.filename,
+        verdict: data.verdict,
+        analyzers: {
+            cnn: { score: data.analyzers?.cnn?.score },
+            ela: { score: data.analyzers?.ela?.score },
+            frequency: { score: data.analyzers?.frequency?.score },
+            noise: { score: data.analyzers?.noise?.score },
+            metadata: { score: data.analyzers?.metadata?.score },
+        },
+        thumbnail: thumbnailDataUrl,
+        date: new Date().toISOString(),
+        total_time_ms: data.total_time_ms,
+    });
+    // Keep only recent items
+    while (history.length > MAX_HISTORY) history.pop();
+    try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    } catch (e) {
+        // localStorage might be full, pop old items
+        history.splice(MAX_HISTORY / 2);
+        try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch { }
+    }
+    updateHistoryBadge();
+}
+
+function clearHistory() {
+    localStorage.removeItem(HISTORY_KEY);
+    updateHistoryBadge();
+}
+
+function updateHistoryBadge() {
+    const count = getHistory().length;
+    dom.historyCount.textContent = count;
+    if (count > 0) {
+        dom.historyCount.classList.remove("hidden");
+    } else {
+        dom.historyCount.classList.add("hidden");
+    }
+}
 
 // ── File Upload Handling ────────────────────────────────────────
-
 dom.uploadZone.addEventListener("click", () => dom.fileInput.click());
-dom.fileInput.addEventListener("change", (e) => handleFileSelect(e.target.files[0]));
+dom.fileInput.addEventListener("change", (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 1) {
+        handleFileSelect(files[0]);
+    } else if (files.length > 1) {
+        handleBatchSelect(files);
+    }
+});
 
 // Drag and drop
 dom.uploadZone.addEventListener("dragover", (e) => {
     e.preventDefault();
     dom.uploadZone.classList.add("drag-over");
 });
-
-dom.uploadZone.addEventListener("dragleave", () => {
-    dom.uploadZone.classList.remove("drag-over");
-});
-
+dom.uploadZone.addEventListener("dragleave", () => dom.uploadZone.classList.remove("drag-over"));
 dom.uploadZone.addEventListener("drop", (e) => {
     e.preventDefault();
     dom.uploadZone.classList.remove("drag-over");
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
-        handleFileSelect(file);
-    }
+    const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
+    if (files.length === 1) handleFileSelect(files[0]);
+    else if (files.length > 1) handleBatchSelect(files);
 });
 
 function handleFileSelect(file) {
     if (!file) return;
     selectedFile = file;
-
-    // Show preview
+    selectedFiles = [];
     const reader = new FileReader();
     reader.onload = (e) => {
         dom.previewImage.src = e.target.result;
         dom.scanImage.src = e.target.result;
     };
     reader.readAsDataURL(file);
-
     dom.fileName.textContent = file.name;
     dom.fileSize.textContent = formatSize(file.size);
-
     dom.uploadZone.classList.add("hidden");
     dom.filePreview.classList.remove("hidden");
+    dom.batchPreview.classList.add("hidden");
+}
+
+function handleBatchSelect(files) {
+    selectedFiles = files.slice(0, 10);
+    selectedFile = null;
+    dom.batchThumbnails.innerHTML = "";
+    selectedFiles.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.className = "batch-thumb";
+            img.title = file.name;
+            dom.batchThumbnails.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    });
+    dom.batchCount.textContent = `${selectedFiles.length} images selected`;
+    dom.uploadZone.classList.add("hidden");
+    dom.filePreview.classList.add("hidden");
+    dom.batchPreview.classList.remove("hidden");
 }
 
 dom.resetBtn.addEventListener("click", resetToUpload);
-dom.analyzeBtn.addEventListener("click", startAnalysis);
+dom.analyzeBtn.addEventListener("click", startSingleAnalysis);
 dom.newAnalysisBtn.addEventListener("click", resetToUpload);
+dom.batchResetBtn.addEventListener("click", resetToUpload);
+dom.batchAnalyzeBtn.addEventListener("click", startBatchAnalysis);
+dom.batchNewBtn.addEventListener("click", resetToUpload);
 
 function resetToUpload() {
     selectedFile = null;
+    selectedFiles = [];
+    currentAnalysisData = null;
     dom.fileInput.value = "";
-
-    dom.hero.classList.remove("hidden");
-    dom.scanning.classList.add("hidden");
-    dom.results.classList.add("hidden");
-
+    showSection("hero");
     dom.uploadZone.classList.remove("hidden");
     dom.filePreview.classList.add("hidden");
-
-    // Clean up chart
-    if (freqChartInstance) {
-        freqChartInstance.destroy();
-        freqChartInstance = null;
-    }
-
+    dom.batchPreview.classList.add("hidden");
+    if (freqChartInstance) { freqChartInstance.destroy(); freqChartInstance = null; }
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// ── Analysis ────────────────────────────────────────────────────
-
-async function startAnalysis() {
-    if (!selectedFile) return;
-
-    // Show scanning UI
+function showSection(section) {
     dom.hero.classList.add("hidden");
-    dom.scanning.classList.remove("hidden");
+    dom.scanning.classList.add("hidden");
     dom.results.classList.add("hidden");
+    dom.batchResults.classList.add("hidden");
+    dom.historySection.classList.add("hidden");
+    dom.compareSection.classList.add("hidden");
+    if (section === "hero") dom.hero.classList.remove("hidden");
+    else if (section === "scanning") dom.scanning.classList.remove("hidden");
+    else if (section === "results") dom.results.classList.remove("hidden");
+    else if (section === "batch") dom.batchResults.classList.remove("hidden");
+    else if (section === "history") dom.historySection.classList.remove("hidden");
+    else if (section === "compare") dom.compareSection.classList.remove("hidden");
+}
 
-    // Animate progress bar
+// ── Single Analysis ─────────────────────────────────────────────
+async function startSingleAnalysis() {
+    if (!selectedFile) return;
+    showSection("scanning");
     const scanMessages = [
         "Initializing forensic analysis...",
         "Running Error Level Analysis...",
@@ -162,14 +271,11 @@ async function startAnalysis() {
         "Generating Grad-CAM explanations...",
         "Aggregating results...",
     ];
-
     let msgIndex = 0;
     const messageInterval = setInterval(() => {
         msgIndex = (msgIndex + 1) % scanMessages.length;
         dom.scanStatusText.textContent = scanMessages[msgIndex];
     }, 2500);
-
-    // Animate progress
     let progress = 0;
     const progressInterval = setInterval(() => {
         progress = Math.min(progress + Math.random() * 8, 90);
@@ -177,263 +283,327 @@ async function startAnalysis() {
     }, 500);
 
     try {
-        // Call API
         const formData = new FormData();
         formData.append("file", selectedFile);
-
-        const response = await fetch("/api/analyze", {
-            method: "POST",
-            body: formData,
-        });
-
+        const response = await fetch("/api/analyze", { method: "POST", body: formData });
         if (!response.ok) {
             const err = await response.json();
             throw new Error(err.detail || "Analysis failed");
         }
-
         const data = await response.json();
-
-        // Complete progress
         clearInterval(progressInterval);
         clearInterval(messageInterval);
         dom.scanProgressBar.style.width = "100%";
         dom.scanStatusText.textContent = "Analysis complete!";
-
-        // Brief pause to show completion
         await sleep(600);
 
-        // Show results
+        currentAnalysisData = data;
+
+        // Save thumbnail and result to history
+        const thumbnailUrl = dom.previewImage.src;
+        saveToHistory(data, thumbnailUrl);
+
         renderResults(data);
     } catch (error) {
         clearInterval(progressInterval);
         clearInterval(messageInterval);
-
         dom.scanStatusText.textContent = `Error: ${error.message}`;
         dom.scanProgressBar.style.width = "0%";
         dom.scanProgressBar.style.background = "var(--red)";
-
         await sleep(2000);
+        dom.scanProgressBar.style.background = "";
         resetToUpload();
     }
 }
 
-// ── Render Results ──────────────────────────────────────────────
+// ── Batch Analysis ──────────────────────────────────────────────
+async function startBatchAnalysis() {
+    if (selectedFiles.length === 0) return;
+    showSection("scanning");
+    dom.scanStatusText.textContent = `Analyzing image 1 of ${selectedFiles.length}...`;
+    let progress = 0;
+    dom.scanProgressBar.style.width = "0%";
 
-function renderResults(data) {
-    dom.scanning.classList.add("hidden");
-    dom.results.classList.remove("hidden");
+    const batchResults = [];
+    const thumbnails = {};
 
-    const { analyzers, verdict, total_time_ms, image_size } = data;
-
-    // ── Verdict ──
-    renderVerdict(verdict, total_time_ms, image_size);
-
-    // ── CNN Panel ──
-    if (analyzers.cnn) {
-        renderCNN(analyzers.cnn);
+    // Read thumbnails first
+    for (const file of selectedFiles) {
+        thumbnails[file.name] = await readAsDataURL(file);
     }
 
-    // ── ELA Panel ──
-    if (analyzers.ela) {
-        renderELA(analyzers.ela);
-    }
+    // Set the first image in the scan view
+    dom.scanImage.src = thumbnails[selectedFiles[0].name];
 
-    // ── Frequency Panel ──
-    if (analyzers.frequency) {
-        renderFrequency(analyzers.frequency);
-    }
+    for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        dom.scanStatusText.textContent = `Analyzing image ${i + 1} of ${selectedFiles.length}: ${file.name}`;
+        dom.scanImage.src = thumbnails[file.name];
+        progress = ((i) / selectedFiles.length) * 100;
+        dom.scanProgressBar.style.width = `${progress}%`;
 
-    // ── Noise Panel ──
-    if (analyzers.noise) {
-        renderNoise(analyzers.noise);
-    }
-
-    // ── Metadata Panel ──
-    if (analyzers.metadata) {
-        renderMetadata(analyzers.metadata);
-    }
-
-    // Scroll to results
-    dom.results.scrollIntoView({ behavior: "smooth" });
-}
-
-// ── Verdict Rendering ───────────────────────────────────────────
-
-function renderVerdict(verdict, totalMs, imageSize) {
-    // Animate score
-    animateCount(dom.verdictScore, 0, Math.round(verdict.score * 100), 1500);
-
-    // Label
-    dom.verdictLabel.textContent = verdict.label;
-    dom.verdictLabel.style.color = verdict.color;
-    dom.verdictLabel.style.borderBottom = `2px solid ${verdict.color}`;
-
-    // Summary
-    dom.verdictSummary.textContent = verdict.summary;
-
-    // Meta
-    dom.analysisTime.textContent = `${(totalMs / 1000).toFixed(1)}s`;
-    if (imageSize) {
-        dom.imageDims.textContent = `${imageSize.width} × ${imageSize.height}`;
-    }
-
-    // Banner border glow
-    dom.verdictBanner.style.borderColor = verdict.color;
-    dom.verdictBanner.style.boxShadow = `0 0 40px ${verdict.color}33`;
-
-    // Draw gauge
-    drawGauge(verdict.score, verdict.color);
-}
-
-function drawGauge(score, color) {
-    const canvas = dom.verdictGauge;
-    const ctx = canvas.getContext("2d");
-    const size = 200;
-    const cx = size / 2;
-    const cy = size / 2;
-    const radius = 80;
-    const lineWidth = 10;
-
-    canvas.width = size;
-    canvas.height = size;
-
-    const startAngle = 0.75 * Math.PI;
-    const totalAngle = 1.5 * Math.PI;
-
-    // Animate the gauge
-    let currentAngle = 0;
-    const targetAngle = score * totalAngle;
-
-    function drawFrame() {
-        ctx.clearRect(0, 0, size, size);
-
-        // Background track
-        ctx.beginPath();
-        ctx.arc(cx, cy, radius, startAngle, startAngle + totalAngle);
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
-        ctx.lineWidth = lineWidth;
-        ctx.lineCap = "round";
-        ctx.stroke();
-
-        // Filled arc
-        if (currentAngle > 0) {
-            ctx.beginPath();
-            ctx.arc(cx, cy, radius, startAngle, startAngle + currentAngle);
-
-            // Gradient
-            const grad = ctx.createLinearGradient(0, 0, size, size);
-            grad.addColorStop(0, "#22c55e");
-            grad.addColorStop(0.5, "#f59e0b");
-            grad.addColorStop(1, "#ef4444");
-            ctx.strokeStyle = color;
-            ctx.lineWidth = lineWidth;
-            ctx.lineCap = "round";
-            ctx.stroke();
-
-            // Glow
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 15;
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-        }
-
-        // Tick marks
-        for (let i = 0; i <= 10; i++) {
-            const angle = startAngle + (i / 10) * totalAngle;
-            const innerR = radius - lineWidth - 4;
-            const outerR = radius - lineWidth - (i % 5 === 0 ? 12 : 8);
-            ctx.beginPath();
-            ctx.moveTo(cx + innerR * Math.cos(angle), cy + innerR * Math.sin(angle));
-            ctx.lineTo(cx + outerR * Math.cos(angle), cy + outerR * Math.sin(angle));
-            ctx.strokeStyle = "rgba(255,255,255,0.15)";
-            ctx.lineWidth = i % 5 === 0 ? 2 : 1;
-            ctx.stroke();
-        }
-
-        if (currentAngle < targetAngle) {
-            currentAngle += (targetAngle - currentAngle) * 0.06 + 0.005;
-            if (currentAngle > targetAngle) currentAngle = targetAngle;
-            requestAnimationFrame(drawFrame);
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            const response = await fetch("/api/analyze", { method: "POST", body: formData });
+            if (!response.ok) throw new Error("Failed");
+            const data = await response.json();
+            data._thumbnail = thumbnails[file.name];
+            batchResults.push(data);
+            // Save each to history
+            saveToHistory(data, thumbnails[file.name]);
+        } catch (e) {
+            batchResults.push({
+                filename: file.name,
+                error: e.message,
+                verdict: { label: "ERROR", score: 0, color: "#ef4444", summary: e.message },
+                _thumbnail: thumbnails[file.name],
+            });
         }
     }
 
-    drawFrame();
+    dom.scanProgressBar.style.width = "100%";
+    dom.scanStatusText.textContent = "Batch analysis complete!";
+    await sleep(600);
+    renderBatchResults(batchResults);
 }
 
-// ── Panel Renderers ─────────────────────────────────────────────
+function readAsDataURL(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(file);
+    });
+}
 
-function renderCNN(data) {
-    // Score badge
-    setScoreBadge(dom.cnnScoreBadge, data.score);
+function renderBatchResults(results) {
+    showSection("batch");
+    dom.batchGrid.innerHTML = "";
+    results.forEach((data, idx) => {
+        const verdict = data.verdict || {};
+        const color = verdict.color || "#888";
+        const card = document.createElement("div");
+        card.className = "batch-card";
+        card.innerHTML = `
+            <img src="${data._thumbnail || ''}" class="batch-card-img" alt="${data.filename}">
+            <div class="batch-card-body">
+                <div class="batch-card-name">${escapeHtml(data.filename)}</div>
+                <span class="batch-card-verdict" style="background: ${color}22; color: ${color}; border: 1px solid ${color}44;">
+                    ${verdict.label || "ERROR"}
+                </span>
+                <span class="batch-card-score">${Math.round((verdict.score || 0) * 100)}%</span>
+            </div>
+        `;
+        card.addEventListener("click", () => {
+            currentAnalysisData = data;
+            renderResults(data);
+        });
+        dom.batchGrid.appendChild(card);
+    });
+}
 
-    // Prediction
-    const predColor =
-        data.prediction === "Real"
-            ? "var(--green)"
-            : data.prediction === "AI-Generated"
-                ? "var(--red)"
-                : "var(--amber)";
+// ── PDF Report ──────────────────────────────────────────────────
+dom.downloadPdfBtn.addEventListener("click", async () => {
+    if (!selectedFile && !currentAnalysisData) return;
+    dom.downloadPdfBtn.textContent = "Generating PDF...";
+    dom.downloadPdfBtn.disabled = true;
 
-    dom.cnnPrediction.innerHTML = `
-        <span class="pred-label" style="background: ${predColor}22; color: ${predColor}; border: 1px solid ${predColor}44;">
-            ${data.prediction}
-        </span>
-        <span class="pred-confidence">${data.confidence}% confidence</span>
+    try {
+        // Re-send the file to the report endpoint
+        const formData = new FormData();
+        if (selectedFile) {
+            formData.append("file", selectedFile);
+        } else {
+            // If no file (loaded from history), we can't regenerate
+            dom.downloadPdfBtn.textContent = "Download PDF Report";
+            dom.downloadPdfBtn.disabled = false;
+            alert("PDF export requires the original image file. Please re-upload the image.");
+            return;
+        }
+
+        const response = await fetch("/api/report", { method: "POST", body: formData });
+        if (!response.ok) throw new Error("PDF generation failed");
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `DeepSight_Report_${currentAnalysisData?.filename || "analysis"}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        alert(`PDF generation failed: ${e.message}`);
+    }
+
+    dom.downloadPdfBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PDF Report
     `;
+    dom.downloadPdfBtn.disabled = false;
+});
 
-    // Description
-    dom.cnnDescription.textContent = data.description;
+// ── Navigation ──────────────────────────────────────────────────
+dom.navHistoryBtn.addEventListener("click", () => {
+    if (dom.historySection.classList.contains("hidden")) {
+        showSection("history");
+        renderHistory();
+    } else {
+        showSection("hero");
+        dom.uploadZone.classList.remove("hidden");
+    }
+});
 
-    // Grad-CAM
-    if (data.gradcam_b64) {
-        dom.cnnGradcam.innerHTML = `<img src="data:image/png;base64,${data.gradcam_b64}" alt="Grad-CAM visualization">`;
+dom.navCompareBtn.addEventListener("click", () => {
+    if (dom.compareSection.classList.contains("hidden")) {
+        showSection("compare");
+        renderComparePickers();
+    } else {
+        showSection("hero");
+        dom.uploadZone.classList.remove("hidden");
+    }
+});
+
+dom.historyCloseBtn.addEventListener("click", () => { showSection("hero"); dom.uploadZone.classList.remove("hidden"); });
+dom.compareCloseBtn.addEventListener("click", () => { showSection("hero"); dom.uploadZone.classList.remove("hidden"); });
+dom.historyClearBtn.addEventListener("click", () => {
+    if (confirm("Clear all analysis history?")) {
+        clearHistory();
+        renderHistory();
+    }
+});
+
+// ── History Rendering ───────────────────────────────────────────
+function renderHistory(selectMode = false, slotTarget = null) {
+    const history = getHistory();
+    dom.historyGrid.innerHTML = "";
+    if (history.length === 0) {
+        dom.historyEmpty.classList.remove("hidden");
+        return;
+    }
+    dom.historyEmpty.classList.add("hidden");
+
+    history.forEach((item) => {
+        const v = item.verdict || {};
+        const color = v.color || "#888";
+        const card = document.createElement("div");
+        card.className = "history-card";
+        card.innerHTML = `
+            <img src="${item.thumbnail || ''}" class="history-card-img" alt="${item.filename}" loading="lazy">
+            <div class="history-card-body">
+                <div class="history-card-name">${escapeHtml(item.filename)}</div>
+                <span class="history-card-verdict" style="background: ${color}22; color: ${color}; border: 1px solid ${color}44;">
+                    ${v.label || "?"}
+                </span>
+                <div class="history-card-date">${new Date(item.date).toLocaleDateString()} ${new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+        `;
+
+        if (selectMode) {
+            card.addEventListener("click", () => {
+                selectCompareItem(item, slotTarget);
+            });
+        }
+
+        dom.historyGrid.appendChild(card);
+    });
+}
+
+// ── Comparison Mode ─────────────────────────────────────────────
+function renderComparePickers() {
+    compareDataA = null;
+    compareDataB = null;
+    dom.compareResultA.classList.add("hidden");
+    dom.compareResultB.classList.add("hidden");
+    dom.comparePickerA.classList.remove("hidden");
+    dom.comparePickerB.classList.remove("hidden");
+    dom.compareChartContainer.classList.add("hidden");
+    if (compareChartInstance) { compareChartInstance.destroy(); compareChartInstance = null; }
+}
+
+dom.comparePickerA.addEventListener("click", () => openHistoryForCompare("a"));
+dom.comparePickerB.addEventListener("click", () => openHistoryForCompare("b"));
+
+function openHistoryForCompare(slot) {
+    compareSlotTarget = slot;
+    showSection("history");
+    renderHistory(true, slot);
+}
+
+function selectCompareItem(item, slot) {
+    if (slot === "a") {
+        compareDataA = item;
+    } else {
+        compareDataB = item;
+    }
+    // Go back to compare view
+    showSection("compare");
+
+    // Render selected items
+    if (compareDataA) renderCompareSlot(compareDataA, "a");
+    if (compareDataB) renderCompareSlot(compareDataB, "b");
+
+    // If both selected, show comparison chart
+    if (compareDataA && compareDataB) {
+        renderCompareChart();
     }
 }
 
-function renderELA(data) {
-    setScoreBadge(dom.elaScoreBadge, data.score);
-    dom.elaDescription.textContent = data.description;
+function renderCompareSlot(item, slot) {
+    const resultEl = slot === "a" ? dom.compareResultA : dom.compareResultB;
+    const pickerEl = slot === "a" ? dom.comparePickerA : dom.comparePickerB;
+    const v = item.verdict || {};
+    const color = v.color || "#888";
+    const analyzers = item.analyzers || {};
 
-    if (data.heatmap_b64) {
-        dom.elaHeatmap.innerHTML = `<img src="data:image/png;base64,${data.heatmap_b64}" alt="ELA heatmap">`;
-    }
+    pickerEl.classList.add("hidden");
+    resultEl.classList.remove("hidden");
+
+    resultEl.innerHTML = `
+        <img src="${item.thumbnail || ''}" alt="${item.filename}">
+        <div class="compare-result-verdict" style="color: ${color};">${v.label || "?"} — ${Math.round((v.score || 0) * 100)}%</div>
+        <div class="batch-card-name">${escapeHtml(item.filename)}</div>
+        <div class="compare-result-scores">
+            <div class="compare-result-score"><span>CNN</span><span>${Math.round((analyzers.cnn?.score || 0) * 100)}%</span></div>
+            <div class="compare-result-score"><span>ELA</span><span>${Math.round((analyzers.ela?.score || 0) * 100)}%</span></div>
+            <div class="compare-result-score"><span>Frequency</span><span>${Math.round((analyzers.frequency?.score || 0) * 100)}%</span></div>
+            <div class="compare-result-score"><span>Noise</span><span>${Math.round((analyzers.noise?.score || 0) * 100)}%</span></div>
+            <div class="compare-result-score"><span>Metadata</span><span>${Math.round((analyzers.metadata?.score || 0) * 100)}%</span></div>
+        </div>
+        <div style="margin-top:8px;"><button class="btn-reset" onclick="document.getElementById('compare-picker-${slot}').classList.remove('hidden');document.getElementById('compare-result-${slot}').classList.add('hidden');">Change</button></div>
+    `;
 }
 
-function renderFrequency(data) {
-    setScoreBadge(dom.freqScoreBadge, data.score);
-    dom.freqDescription.textContent = data.description;
+function renderCompareChart() {
+    dom.compareChartContainer.classList.remove("hidden");
+    if (compareChartInstance) compareChartInstance.destroy();
 
-    if (data.spectrum_b64) {
-        dom.freqSpectrum.innerHTML = `<img src="data:image/png;base64,${data.spectrum_b64}" alt="Frequency spectrum">`;
-    }
+    const labels = ["CNN", "ELA", "Frequency", "Noise", "Metadata"];
+    const keys = ["cnn", "ela", "frequency", "noise", "metadata"];
 
-    // Radial profile chart
-    if (data.radial_profile_data && data.radial_profile_data.length > 0) {
-        renderFrequencyChart(data.radial_profile_data);
-    }
-}
+    const dataA = keys.map((k) => Math.round(((compareDataA.analyzers?.[k]?.score || 0)) * 100));
+    const dataB = keys.map((k) => Math.round(((compareDataB.analyzers?.[k]?.score || 0)) * 100));
 
-function renderFrequencyChart(profileData) {
-    if (freqChartInstance) {
-        freqChartInstance.destroy();
-    }
-
-    const ctx = dom.freqChart.getContext("2d");
-
-    freqChartInstance = new Chart(ctx, {
-        type: "line",
+    const ctx = dom.compareChart.getContext("2d");
+    compareChartInstance = new Chart(ctx, {
+        type: "bar",
         data: {
-            labels: profileData.map((d) => d.frequency),
+            labels,
             datasets: [
                 {
-                    label: "Radial Power",
-                    data: profileData.map((d) => d.power),
-                    borderColor: "#818cf8",
-                    backgroundColor: "rgba(129, 140, 248, 0.1)",
-                    borderWidth: 1.5,
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 0,
+                    label: compareDataA.filename || "Image A",
+                    data: dataA,
+                    backgroundColor: "rgba(6, 214, 160, 0.6)",
+                    borderColor: "rgba(6, 214, 160, 1)",
+                    borderWidth: 1,
+                    borderRadius: 4,
+                },
+                {
+                    label: compareDataB.filename || "Image B",
+                    data: dataB,
+                    backgroundColor: "rgba(224, 64, 251, 0.6)",
+                    borderColor: "rgba(224, 64, 251, 1)",
+                    borderWidth: 1,
+                    borderRadius: 4,
                 },
             ],
         },
@@ -441,36 +611,127 @@ function renderFrequencyChart(profileData) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: "#1a1a2e",
-                    titleColor: "#f0f0f5",
-                    bodyColor: "#8888a0",
-                    borderColor: "rgba(255,255,255,0.1)",
-                    borderWidth: 1,
-                },
+                legend: { labels: { color: "#8888a0", font: { size: 11 } } },
             },
             scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: "Frequency",
-                        color: "#55556a",
-                        font: { family: "'JetBrains Mono'", size: 10 },
-                    },
-                    ticks: { color: "#55556a", font: { size: 9 }, maxTicksLimit: 8 },
-                    grid: { color: "rgba(255,255,255,0.03)" },
-                },
+                x: { ticks: { color: "#55556a" }, grid: { color: "rgba(255,255,255,0.03)" } },
                 y: {
-                    title: {
-                        display: true,
-                        text: "Normalized Power",
-                        color: "#55556a",
-                        font: { family: "'JetBrains Mono'", size: 10 },
-                    },
-                    ticks: { color: "#55556a", font: { size: 9 }, maxTicksLimit: 5 },
+                    beginAtZero: true, max: 100,
+                    ticks: { color: "#55556a", callback: (v) => v + "%" },
                     grid: { color: "rgba(255,255,255,0.03)" },
                 },
+            },
+        },
+    });
+}
+
+// ── Render Results (single) ─────────────────────────────────────
+function renderResults(data) {
+    showSection("results");
+    const { analyzers, verdict, total_time_ms, image_size } = data;
+    renderVerdict(verdict, total_time_ms, image_size);
+    if (analyzers.cnn) renderCNN(analyzers.cnn);
+    if (analyzers.ela) renderELA(analyzers.ela);
+    if (analyzers.frequency) renderFrequency(analyzers.frequency);
+    if (analyzers.noise) renderNoise(analyzers.noise);
+    if (analyzers.metadata) renderMetadata(analyzers.metadata);
+    dom.results.scrollIntoView({ behavior: "smooth" });
+}
+
+// ── Verdict Rendering ───────────────────────────────────────────
+function renderVerdict(verdict, totalMs, imageSize) {
+    animateCount(dom.verdictScore, 0, Math.round(verdict.score * 100), 1500);
+    dom.verdictLabel.textContent = verdict.label;
+    dom.verdictLabel.style.color = verdict.color;
+    dom.verdictLabel.style.borderBottom = `2px solid ${verdict.color}`;
+    dom.verdictSummary.textContent = verdict.summary;
+    dom.analysisTime.textContent = `${(totalMs / 1000).toFixed(1)}s`;
+    if (imageSize) dom.imageDims.textContent = `${imageSize.width} × ${imageSize.height}`;
+    dom.verdictBanner.style.borderColor = verdict.color;
+    dom.verdictBanner.style.boxShadow = `0 0 40px ${verdict.color}33`;
+    drawGauge(verdict.score, verdict.color);
+}
+
+function drawGauge(score, color) {
+    const canvas = dom.verdictGauge;
+    const ctx = canvas.getContext("2d");
+    const size = 200; const cx = size / 2; const cy = size / 2;
+    const radius = 80; const lineWidth = 10;
+    canvas.width = size; canvas.height = size;
+    const startAngle = 0.75 * Math.PI; const totalAngle = 1.5 * Math.PI;
+    let currentAngle = 0; const targetAngle = score * totalAngle;
+
+    function drawFrame() {
+        ctx.clearRect(0, 0, size, size);
+        ctx.beginPath(); ctx.arc(cx, cy, radius, startAngle, startAngle + totalAngle);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.06)"; ctx.lineWidth = lineWidth; ctx.lineCap = "round"; ctx.stroke();
+        if (currentAngle > 0) {
+            ctx.beginPath(); ctx.arc(cx, cy, radius, startAngle, startAngle + currentAngle);
+            ctx.strokeStyle = color; ctx.lineWidth = lineWidth; ctx.lineCap = "round"; ctx.stroke();
+            ctx.shadowColor = color; ctx.shadowBlur = 15; ctx.stroke(); ctx.shadowBlur = 0;
+        }
+        for (let i = 0; i <= 10; i++) {
+            const angle = startAngle + (i / 10) * totalAngle;
+            const innerR = radius - lineWidth - 4;
+            const outerR = radius - lineWidth - (i % 5 === 0 ? 12 : 8);
+            ctx.beginPath();
+            ctx.moveTo(cx + innerR * Math.cos(angle), cy + innerR * Math.sin(angle));
+            ctx.lineTo(cx + outerR * Math.cos(angle), cy + outerR * Math.sin(angle));
+            ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.lineWidth = i % 5 === 0 ? 2 : 1; ctx.stroke();
+        }
+        if (currentAngle < targetAngle) {
+            currentAngle += (targetAngle - currentAngle) * 0.06 + 0.005;
+            if (currentAngle > targetAngle) currentAngle = targetAngle;
+            requestAnimationFrame(drawFrame);
+        }
+    }
+    drawFrame();
+}
+
+// ── Panel Renderers ─────────────────────────────────────────────
+function renderCNN(data) {
+    setScoreBadge(dom.cnnScoreBadge, data.score);
+    const predColor = data.prediction === "Real" ? "var(--green)" : data.prediction === "AI-Generated" ? "var(--red)" : "var(--amber)";
+    dom.cnnPrediction.innerHTML = `
+        <span class="pred-label" style="background: ${predColor}22; color: ${predColor}; border: 1px solid ${predColor}44;">${data.prediction}</span>
+        <span class="pred-confidence">${data.confidence}% confidence</span>
+    `;
+    dom.cnnDescription.textContent = data.description;
+    if (data.gradcam_b64) dom.cnnGradcam.innerHTML = `<img src="data:image/png;base64,${data.gradcam_b64}" alt="Grad-CAM">`;
+}
+
+function renderELA(data) {
+    setScoreBadge(dom.elaScoreBadge, data.score);
+    dom.elaDescription.textContent = data.description;
+    if (data.heatmap_b64) dom.elaHeatmap.innerHTML = `<img src="data:image/png;base64,${data.heatmap_b64}" alt="ELA heatmap">`;
+}
+
+function renderFrequency(data) {
+    setScoreBadge(dom.freqScoreBadge, data.score);
+    dom.freqDescription.textContent = data.description;
+    if (data.spectrum_b64) dom.freqSpectrum.innerHTML = `<img src="data:image/png;base64,${data.spectrum_b64}" alt="Spectrum">`;
+    if (data.radial_profile_data?.length > 0) renderFrequencyChart(data.radial_profile_data);
+}
+
+function renderFrequencyChart(profileData) {
+    if (freqChartInstance) freqChartInstance.destroy();
+    const ctx = dom.freqChart.getContext("2d");
+    freqChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: profileData.map((d) => d.frequency),
+            datasets: [{
+                label: "Radial Power", data: profileData.map((d) => d.power),
+                borderColor: "#818cf8", backgroundColor: "rgba(129, 140, 248, 0.1)",
+                borderWidth: 1.5, fill: true, tension: 0.3, pointRadius: 0,
+            }],
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: "#55556a", font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: "rgba(255,255,255,0.03)" } },
+                y: { ticks: { color: "#55556a", font: { size: 9 }, maxTicksLimit: 5 }, grid: { color: "rgba(255,255,255,0.03)" } },
             },
         },
     });
@@ -479,78 +740,40 @@ function renderFrequencyChart(profileData) {
 function renderNoise(data) {
     setScoreBadge(dom.noiseScoreBadge, data.score);
     dom.noiseDescription.textContent = data.description;
-
-    if (data.noise_map_b64) {
-        dom.noiseMap.innerHTML = `<img src="data:image/png;base64,${data.noise_map_b64}" alt="Noise variance map">`;
-    }
+    if (data.noise_map_b64) dom.noiseMap.innerHTML = `<img src="data:image/png;base64,${data.noise_map_b64}" alt="Noise map">`;
 }
 
 function renderMetadata(data) {
     setScoreBadge(dom.metaScoreBadge, data.score);
     dom.metaDescription.textContent = data.description;
-
-    // Flags
-    if (data.flags && data.flags.length > 0) {
-        dom.metaFlags.innerHTML = data.flags
-            .map((flag) => {
-                const icon =
-                    flag.type === "danger" ? "🚨" : flag.type === "warning" ? "⚠️" : "ℹ️";
-                return `
-                    <div class="meta-flag flag-${flag.type}">
-                        <span class="meta-flag-icon">${icon}</span>
-                        <span>${escapeHtml(flag.message)}</span>
-                    </div>
-                `;
-            })
-            .join("");
+    if (data.flags?.length > 0) {
+        dom.metaFlags.innerHTML = data.flags.map((flag) => {
+            const icon = flag.type === "danger" ? "🚨" : flag.type === "warning" ? "⚠️" : "ℹ️";
+            return `<div class="meta-flag flag-${flag.type}"><span class="meta-flag-icon">${icon}</span><span>${escapeHtml(flag.message)}</span></div>`;
+        }).join("");
     }
-
-    // Details table
     if (data.metadata) {
         const exif = data.metadata.exif || {};
-        const rows = Object.entries(exif)
-            .filter(([k, v]) => typeof v === "string" && v.length < 150)
-            .slice(0, 20);
-
+        const rows = Object.entries(exif).filter(([k, v]) => typeof v === "string" && v.length < 150).slice(0, 20);
         if (rows.length > 0) {
-            dom.metaDetails.innerHTML = `
-                <table>
-                    <tbody>
-                        ${rows
-                    .map(
-                        ([key, val]) => `
-                            <tr>
-                                <th>${escapeHtml(key)}</th>
-                                <td>${escapeHtml(val)}</td>
-                            </tr>
-                        `
-                    )
-                    .join("")}
-                    </tbody>
-                </table>
-            `;
+            dom.metaDetails.innerHTML = `<table><tbody>${rows.map(([key, val]) =>
+                `<tr><th>${escapeHtml(key)}</th><td>${escapeHtml(val)}</td></tr>`
+            ).join("")}</tbody></table>`;
         } else {
-            dom.metaDetails.innerHTML = `
-                <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px;">
-                    No readable EXIF data found in this image.
-                </p>
-            `;
+            dom.metaDetails.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px;">No readable EXIF data found.</p>`;
         }
     }
 }
 
 // ── Helpers ─────────────────────────────────────────────────────
-
 function setScoreBadge(element, score) {
     const pct = Math.round(score * 100);
     let color;
-
     if (score < 0.3) color = "var(--green)";
     else if (score < 0.5) color = "var(--lime)";
     else if (score < 0.65) color = "var(--amber)";
     else if (score < 0.8) color = "var(--orange)";
     else color = "var(--red)";
-
     element.textContent = `${pct}%`;
     element.style.color = color;
     element.style.background = `${color}15`;
@@ -559,20 +782,13 @@ function setScoreBadge(element, score) {
 
 function animateCount(element, from, to, duration) {
     const start = performance.now();
-
     function update(now) {
         const elapsed = now - start;
         const progress = Math.min(elapsed / duration, 1);
-        // Ease out cubic
         const eased = 1 - Math.pow(1 - progress, 3);
-        const current = Math.round(from + (to - from) * eased);
-        element.textContent = current;
-
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        }
+        element.textContent = Math.round(from + (to - from) * eased);
+        if (progress < 1) requestAnimationFrame(update);
     }
-
     requestAnimationFrame(update);
 }
 
@@ -591,3 +807,6 @@ function escapeHtml(str) {
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+// ── Init ────────────────────────────────────────────────────────
+updateHistoryBadge();

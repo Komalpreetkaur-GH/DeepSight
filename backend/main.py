@@ -135,7 +135,86 @@ async def analyze_image(file: UploadFile = File(...)):
     return JSONResponse(content=response_data)
 
 
+@app.post("/api/analyze-batch")
+async def analyze_batch(files: list[UploadFile] = File(...)):
+    """
+    Upload multiple images and run forensic analysis on each.
+    Returns an array of results. Max 10 images per batch.
+    """
+    if len(files) > 10:
+        raise HTTPException(status_code=400, detail="Maximum 10 images per batch.")
+
+    all_results = []
+    for file in files:
+        try:
+            contents = await file.read()
+            image = Image.open(io.BytesIO(contents))
+            image.load()
+
+            # Resize if too large
+            MAX_DIM = 2048
+            if max(image.size) > MAX_DIM:
+                ratio = MAX_DIM / max(image.size)
+                new_size = (int(image.size[0] * ratio), int(image.size[1] * ratio))
+                image = image.resize(new_size, Image.LANCZOS)
+
+            results = pipeline.analyze(image)
+
+            all_results.append(sanitize_for_json({
+                "filename": file.filename,
+                "image_size": {"width": image.size[0], "height": image.size[1]},
+                **results,
+            }))
+        except Exception as e:
+            all_results.append({
+                "filename": file.filename,
+                "error": str(e),
+                "verdict": {"label": "ERROR", "score": 0, "color": "#ef4444", "summary": str(e)},
+            })
+
+    return JSONResponse(content=all_results)
+
+
+@app.post("/api/report")
+async def generate_report_endpoint(file: UploadFile = File(...)):
+    """
+    Upload an image, analyze it, and return a PDF forensic report.
+    """
+    from .report import generate_report
+    from fastapi.responses import StreamingResponse
+
+    try:
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents))
+        image.load()
+
+        MAX_DIM = 2048
+        if max(image.size) > MAX_DIM:
+            ratio = MAX_DIM / max(image.size)
+            new_size = (int(image.size[0] * ratio), int(image.size[1] * ratio))
+            image = image.resize(new_size, Image.LANCZOS)
+
+        results = pipeline.analyze(image)
+
+        analysis_data = sanitize_for_json({
+            "filename": file.filename,
+            "image_size": {"width": image.size[0], "height": image.size[1]},
+            **results,
+        })
+
+        pdf_bytes = generate_report(analysis_data)
+
+        return StreamingResponse(
+            io.BytesIO(pdf_bytes),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="DeepSight_Report_{file.filename}.pdf"'},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
+
+
 # ── Mount Static Files (after API routes) ────────────────────────────────────
 
 if FRONTEND_DIR.exists():
     app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
+
