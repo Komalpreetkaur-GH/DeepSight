@@ -1,7 +1,5 @@
 # Specula — Deploy Requirements
-# CPU-only torch is fetched via --extra-index-url in Dockerfile
-torch==2.1.2+cpu
-torchvision==0.16.2+cpu
+# Note: torch and torchvision are installed explicitly in Dockerfile
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
 python-multipart>=0.0.9
