@@ -6,7 +6,6 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
 ![HuggingFace](https://img.shields.io/badge/HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
 **AI-powered image forensic analysis that detects deepfakes and explains _exactly why_ an image is fake.**
 
@@ -215,7 +214,6 @@ The weighted average determines the final verdict:
 
 ## 📝 License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ---
 
