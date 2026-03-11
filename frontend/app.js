@@ -950,16 +950,68 @@ function initInteractions() {
     });
 }
 
-function toggleTheme() {
+function toggleTheme(e) {
     const isDark = document.documentElement.hasAttribute('data-theme');
-    if (isDark) {
-        document.documentElement.removeAttribute('data-theme');
-        localStorage.setItem('theme', 'light');
-    } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
-    }
-    updateThemeIcons();
+    const targetTheme = isDark ? 'light' : 'dark';
+    
+    // 1. Position Droplet at button
+    const rect = dom.themeToggle.getBoundingClientRect();
+    const startX = rect.left + rect.width / 2;
+    const startY = rect.top + rect.height / 2;
+    
+    const droplet = document.createElement('div');
+    droplet.className = 'theme-droplet';
+    droplet.style.left = `${startX - 10}px`;
+    droplet.style.top = `${startY - 10}px`;
+    document.body.appendChild(droplet);
+    
+    // 2. Animate Fall to center
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    
+    requestAnimationFrame(() => {
+        droplet.style.transform = `translate(${centerX - startX}px, ${centerY - startY}px) scale(0.5)`;
+    });
+    
+    // 3. Impact & Expand
+    setTimeout(() => {
+        // Impact effect
+        const impact = document.createElement('div');
+        impact.className = 'droplet-impact-effect';
+        impact.style.left = `${centerX - 20}px`;
+        impact.style.top = `${centerY - 20}px`;
+        document.body.appendChild(impact);
+        droplet.remove();
+        
+        // Create Transition Overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'theme-ripple-overlay';
+        if (targetTheme === 'dark') overlay.setAttribute('data-theme', 'dark');
+        document.body.appendChild(overlay);
+        
+        // Trigger reveal
+        setTimeout(() => {
+            overlay.classList.add('active');
+            
+            // Swap actual theme halfway through
+            setTimeout(() => {
+                if (targetTheme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+                localStorage.setItem('theme', targetTheme);
+                updateThemeIcons();
+            }, 600);
+            
+            // Cleanup
+            setTimeout(() => {
+                overlay.remove();
+                impact.remove();
+            }, 1300);
+        }, 50);
+        
+    }, 800);
 }
 
 function updateThemeIcons() {
