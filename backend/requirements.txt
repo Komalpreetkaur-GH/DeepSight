@@ -11,3 +11,4 @@ timm==1.0.9
 transformers==4.44.0
 pywt==1.7.0
 reportlab>=4.0
+requests>=2.31.0

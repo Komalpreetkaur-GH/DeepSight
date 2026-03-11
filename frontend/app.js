@@ -93,6 +93,18 @@ const dom = {
     compareCloseBtn: $("#compare-close-btn"),
     compareChartContainer: $("#compare-chart-container"),
     compareChart: $("#compare-chart"),
+
+    // URL
+    uploadTabs: $("#upload-tabs"),
+    tabUpload: $("#tab-upload"),
+    tabUrl: $("#tab-url"),
+    urlInputZone: $("#url-input-zone"),
+    urlInput: $("#url-input"),
+    urlAnalyzeBtn: $("#url-analyze-btn"),
+    urlError: $("#url-error"),
+    themeToggle: $("#theme-toggle"),
+    sunIcon: $(".sun-icon"),
+    moonIcon: $(".moon-icon"),
 };
 
 // ── State ───────────────────────────────────────────────────────
@@ -228,14 +240,32 @@ dom.newAnalysisBtn.addEventListener("click", resetToUpload);
 dom.batchResetBtn.addEventListener("click", resetToUpload);
 dom.batchAnalyzeBtn.addEventListener("click", startBatchAnalysis);
 dom.batchNewBtn.addEventListener("click", resetToUpload);
+dom.urlAnalyzeBtn.addEventListener("click", startUrlAnalysis);
+dom.urlInput.addEventListener("keydown", (e) => { if (e.key === "Enter") startUrlAnalysis(); });
+
+// Tab switching
+dom.tabUpload.addEventListener("click", () => switchUploadMode("upload"));
+dom.tabUrl.addEventListener("click", () => switchUploadMode("url"));
+
+function switchUploadMode(mode) {
+    dom.tabUpload.classList.toggle("active", mode === "upload");
+    dom.tabUrl.classList.toggle("active", mode === "url");
+    dom.uploadZone.classList.toggle("hidden", mode !== "upload");
+    dom.urlInputZone.classList.toggle("hidden", mode !== "url");
+    dom.filePreview.classList.add("hidden");
+    dom.batchPreview.classList.add("hidden");
+    dom.urlError.classList.add("hidden");
+}
 
 function resetToUpload() {
     selectedFile = null;
     selectedFiles = [];
     currentAnalysisData = null;
     dom.fileInput.value = "";
+    dom.urlInput.value = "";
+    dom.urlError.classList.add("hidden");
     showSection("hero");
-    dom.uploadZone.classList.remove("hidden");
+    switchUploadMode("upload");
     dom.filePreview.classList.add("hidden");
     dom.batchPreview.classList.add("hidden");
     if (freqChartInstance) { freqChartInstance.destroy(); freqChartInstance = null; }
@@ -808,5 +838,164 @@ function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// ── URL Analysis ────────────────────────────────────────────────
+async function startUrlAnalysis() {
+    const url = dom.urlInput.value.trim();
+    if (!url) {
+        dom.urlError.textContent = "Please enter a URL.";
+        dom.urlError.classList.remove("hidden");
+        return;
+    }
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        dom.urlError.textContent = "URL must start with http:// or https://";
+        dom.urlError.classList.remove("hidden");
+        return;
+    }
+    dom.urlError.classList.add("hidden");
+    showSection("scanning");
+    dom.scanImage.src = url;  // Show the image during scanning
+    dom.scanStatusText.textContent = "Fetching image from URL...";
+
+    const scanMessages = [
+        "Fetching image from URL...",
+        "Running Error Level Analysis...",
+        "Analyzing frequency spectrum...",
+        "Examining noise patterns...",
+        "Scanning metadata for AI signatures...",
+        "Running neural network classification...",
+        "Generating Grad-CAM explanations...",
+        "Aggregating results...",
+    ];
+    let msgIndex = 0;
+    const messageInterval = setInterval(() => {
+        msgIndex = (msgIndex + 1) % scanMessages.length;
+        dom.scanStatusText.textContent = scanMessages[msgIndex];
+    }, 2500);
+    let progress = 0;
+    dom.scanProgressBar.style.width = "0%";
+    const progressInterval = setInterval(() => {
+        progress = Math.min(progress + Math.random() * 8, 90);
+        dom.scanProgressBar.style.width = `${progress}%`;
+    }, 500);
+
+    try {
+        const response = await fetch("/api/analyze-url", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
+        });
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.detail || "Analysis failed");
+        }
+        const data = await response.json();
+        clearInterval(progressInterval);
+        clearInterval(messageInterval);
+        dom.scanProgressBar.style.width = "100%";
+        dom.scanStatusText.textContent = "Analysis complete!";
+        await sleep(600);
+
+        currentAnalysisData = data;
+        // Use URL as thumbnail for history
+        saveToHistory(data, url);
+        renderResults(data);
+    } catch (error) {
+        clearInterval(progressInterval);
+        clearInterval(messageInterval);
+        dom.scanStatusText.textContent = `Error: ${error.message}`;
+        dom.scanProgressBar.style.width = "0%";
+        dom.scanProgressBar.style.background = "var(--red)";
+        await sleep(2500);
+        dom.scanProgressBar.style.background = "";
+        resetToUpload();
+    }
+}
+
 // ── Init ────────────────────────────────────────────────────────
 updateHistoryBadge();
+
+// ── UI Interactions ─────────────────────────────────────────────
+function createRipple(e) {
+    const btn = e.currentTarget;
+    const ripple = document.createElement("span");
+    ripple.className = "liquid-ripple";
+
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    ripple.style.width = ripple.style.height = `${size}px`;
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+
+    btn.appendChild(ripple);
+    
+    // Remove ripple after animation finishes
+    setTimeout(() => ripple.remove(), 600);
+}
+
+function initInteractions() {
+    // Theme Toggle
+    dom.themeToggle.addEventListener('click', toggleTheme);
+
+    // Select all buttons, tabs, and interactive glass elements
+    const interactables = $$(
+        '.btn-analyze, .btn-reset, .btn-action, .btn-new-analysis, ' +
+        '.upload-tab, .nav-btn, .batch-card, .history-card, .logo-badge'
+    );
+    
+    interactables.forEach(item => {
+        item.addEventListener('click', createRipple);
+    });
+}
+
+function toggleTheme() {
+    const isDark = document.documentElement.hasAttribute('data-theme');
+    if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    }
+    updateThemeIcons();
+}
+
+function updateThemeIcons() {
+    const isDark = document.documentElement.hasAttribute('data-theme');
+    dom.sunIcon.classList.toggle('hidden', isDark);
+    dom.moonIcon.classList.toggle('hidden', !isDark);
+}
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+    updateThemeIcons();
+}
+
+// ── Initialization ──────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    initTheme();
+    updateHistoryBadge();
+    initInteractions();
+    
+    // Smooth scroll for nav links if added later
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+});

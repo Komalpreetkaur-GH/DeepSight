@@ -213,6 +213,77 @@ async def generate_report_endpoint(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
 
 
+@app.post("/api/analyze-url")
+async def analyze_url(body: dict):
+    """
+    Fetch an image from a URL and run forensic analysis.
+    Expects JSON body: {"url": "https://..."}
+    """
+    import requests as http_requests
+    from urllib.parse import urlparse
+
+    url = body.get("url", "").strip()
+    if not url:
+        raise HTTPException(status_code=400, detail="No URL provided.")
+
+    # Basic URL validation
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise HTTPException(status_code=400, detail="Invalid URL. Must start with http:// or https://")
+
+    try:
+        # Fetch image
+        resp = http_requests.get(url, timeout=15, headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }, stream=True)
+        resp.raise_for_status()
+
+        # Check content type
+        content_type = resp.headers.get("Content-Type", "")
+        if not content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail=f"URL does not point to an image (got {content_type})")
+
+        # Read image
+        image_data = resp.content
+        if len(image_data) > 20 * 1024 * 1024:  # 20MB limit
+            raise HTTPException(status_code=400, detail="Image too large (max 20MB)")
+
+        image = Image.open(io.BytesIO(image_data))
+        image.load()
+
+        # Resize if too large
+        MAX_DIM = 2048
+        if max(image.size) > MAX_DIM:
+            ratio = MAX_DIM / max(image.size)
+            new_size = (int(image.size[0] * ratio), int(image.size[1] * ratio))
+            image = image.resize(new_size, Image.LANCZOS)
+
+        # Extract filename from URL
+        filename = parsed.path.split("/")[-1] or "url_image"
+        if not any(filename.lower().endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".webp", ".bmp")):
+            filename += ".jpg"
+
+        results = pipeline.analyze(image)
+
+        response_data = sanitize_for_json({
+            "filename": filename,
+            "source_url": url,
+            "image_size": {"width": image.size[0], "height": image.size[1]},
+            **results,
+        })
+
+        return JSONResponse(content=response_data)
+
+    except HTTPException:
+        raise
+    except http_requests.exceptions.Timeout:
+        raise HTTPException(status_code=408, detail="Timeout: Could not fetch image within 15 seconds")
+    except http_requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch image: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+
 # ── Mount Static Files (after API routes) ────────────────────────────────────
 
 if FRONTEND_DIR.exists():
