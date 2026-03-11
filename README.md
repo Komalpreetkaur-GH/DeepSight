@@ -1,4 +1,4 @@
-# 🔍 DeepSight — Deepfake Forensics Toolkit
+# 🔍 Specula — Deepfake Forensics Toolkit
 
 <div align="center">
 
@@ -15,17 +15,17 @@
 
 ---
 
-![DeepSight Landing Page](docs/screenshot-landing.png)
+![Specula Landing Page](docs/screenshot-landing.png)
 
-## 🎯 What is DeepSight?
+## 🎯 What is Specula?
 
-DeepSight is a **full-stack deepfake detection toolkit** that combines **5 independent forensic analysis methods** to determine whether an image is AI-generated or manipulated. Unlike black-box detectors, DeepSight explains its reasoning with **visual heatmaps, spectral analysis, and metadata forensics**.
+Specula is a **full-stack deepfake detection toolkit** that combines **5 independent forensic analysis methods** to determine whether an image is AI-generated or manipulated. Unlike black-box detectors, Specula explains its reasoning with **visual heatmaps, spectral analysis, and metadata forensics**.
 
 Built as a modern web app with a FastAPI backend and vanilla JS frontend — no frameworks, no bloat.
 
 ## 🔬 How It Works
 
-DeepSight runs **5 parallel forensic analyses** on every uploaded image:
+Specula runs **5 parallel forensic analyses** on every uploaded image:
 
 | # | Method | What It Detects | Output |
 |---|--------|----------------|--------|
@@ -111,8 +111,8 @@ PROBABLY REAL → INCONCLUSIVE → SUSPICIOUS → LIKELY AI-GENERATED
 
 ```bash
 # Clone the repo
-git clone https://github.com/Komalpreetkaur-GH/DeepSight.git
-cd DeepSight
+git clone https://github.com/Komalpreetkaur-GH/Specula.git
+cd Specula
 
 # Install dependencies
 pip install -r backend/requirements.txt
@@ -136,7 +136,7 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 ## 📁 Project Structure
 
 ```
-DeepSight/
+Specula/
 ├── backend/
 │   ├── analyzers/
 │   │   ├── classifier.py     # CNN classifier + Grad-CAM

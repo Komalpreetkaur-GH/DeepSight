@@ -1,16 +1,16 @@
-/* ═══════════════════════════════════════════════════════════════
-   DeepSight — Deepfake Forensics Toolkit
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   Specula â€” Deepfake Forensics Toolkit
    Liquid Glass Design System
-   ═══════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── CSS Variables ───────────────────────────────────────────── */
+/* â”€â”€ CSS Variables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 :root {
     --bg-primary: #f2f5f7;
     --bg-secondary: #e6ecef;
     --bg-card: rgba(255, 255, 255, 0.45);
     --bg-card-hover: rgba(255, 255, 255, 0.6);
-    --border: rgba(255, 255, 255, 0.6);
-    --border-accent: rgba(50, 173, 230, 0.4);
+    --border: rgba(255, 255, 255, 0.2);
+    --border-accent: rgba(50, 173, 230, 0.2);
     --text-primary: #1c1c1e;
     --text-secondary: #3a3a3c;
     --text-muted: #8e8e93;
@@ -24,15 +24,16 @@
     --green: #30D158;
     --indigo: #32ADE6;
     --glass-bg: rgba(255, 255, 255, 0.25);
-    --glass-border: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.15);
     --glass-blur: blur(40px) saturate(220%) contrast(98%);
     --glass-glow: 0 0 50px rgba(50, 173, 230, 0.12);
     --glass-shadow: 
         0 20px 60px rgba(0, 0, 0, 0.05),
         0 10px 20px rgba(0, 0, 0, 0.02);
     --glass-inner-shadow: 
-        inset 0 1px 1px rgba(255, 255, 255, 0.9),
-        inset 0 -1px 1.5px rgba(255, 255, 255, 0.2);
+        inset 0 1px 1px rgba(255, 255, 255, 0.8),
+        inset 0 -1px 2px rgba(255, 255, 255, 0.1),
+        inset 0 0 30px rgba(255, 255, 255, 0.1);
     --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
     --font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
     --radius-lg: 32px;
@@ -40,9 +41,9 @@
     
     /* Semantic Glass Tokens */
     --nav-bg: rgba(255, 255, 255, 0.45);
-    --nav-border: rgba(255, 255, 255, 0.5);
+    --nav-border: rgba(255, 255, 255, 0.15);
     --input-bg: rgba(255, 255, 255, 0.45);
-    --input-border: rgba(255, 255, 255, 0.6);
+    --input-border: rgba(255, 255, 255, 0.2);
     --tab-bg: var(--bg-card);
     --tab-active-bg: rgba(255, 255, 255, 0.55);
     --panel-bg: rgba(255, 255, 255, 0.28);
@@ -53,13 +54,13 @@
     --bg-secondary: #0a0c10;
     --bg-card: rgba(20, 22, 28, 0.5);
     --bg-card-hover: rgba(30, 32, 40, 0.7);
-    --border: rgba(255, 255, 255, 0.08);
-    --border-accent: rgba(50, 173, 230, 0.6);
+    --border: rgba(255, 255, 255, 0.05);
+    --border-accent: rgba(50, 173, 230, 0.3);
     --text-primary: #f5f5f7;
     --text-secondary: #c7c7cc;
     --text-muted: #8e8e93;
     --glass-bg: rgba(10, 12, 18, 0.5);
-    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.06);
     --glass-blur: blur(40px) saturate(220%) contrast(105%);
     --glass-glow: 0 0 60px rgba(50, 173, 230, 0.25);
     --glass-shadow: 
@@ -71,15 +72,15 @@
 
     /* Semantic Overrides */
     --nav-bg: rgba(10, 12, 18, 0.75);
-    --nav-border: rgba(255, 255, 255, 0.1);
+    --nav-border: rgba(255, 255, 255, 0.05);
     --input-bg: rgba(0, 0, 0, 0.4);
-    --input-border: rgba(50, 173, 230, 0.3);
+    --input-border: rgba(50, 173, 230, 0.15);
     --tab-bg: rgba(15, 17, 23, 0.6);
     --tab-active-bg: rgba(40, 42, 50, 0.8);
     --panel-bg: rgba(15, 17, 23, 0.45);
 }
 
-/* ── Reset ───────────────────────────────────────────────────── */
+/* â”€â”€ Reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 *,
 *::before,
 *::after {
@@ -109,7 +110,7 @@ img {
     border-radius: var(--radius-sm);
 }
 
-/* ── Ambient Background ──────────────────────────────────────── */
+/* â”€â”€ Ambient Background â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .ambient-bg {
     position: fixed;
     inset: 0;
@@ -124,6 +125,8 @@ img {
     filter: blur(80px);
     opacity: 0.5;
     animation: float 25s ease-in-out infinite;
+    will-change: transform;
+    transform: translate3d(0,0,0);
 }
 
 .orb-1 {
@@ -132,7 +135,6 @@ img {
     background: radial-gradient(circle, #32ADE6 0%, transparent 70%);
     top: -150px;
     left: -100px;
-    animation-delay: 0s;
 }
 
 .orb-2 {
@@ -141,7 +143,6 @@ img {
     background: radial-gradient(circle, #30D1BE 0%, transparent 70%);
     bottom: -150px;
     right: -100px;
-    animation-delay: -8s;
 }
 
 .orb-3 {
@@ -155,22 +156,18 @@ img {
 }
 
 @keyframes float {
-
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
+    0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
     }
-
     33% {
-        transform: translate(50px, -50px) scale(1.1);
+        transform: translate3d(50px, -50px, 0) scale(1.1);
     }
-
     66% {
-        transform: translate(-30px, 30px) scale(0.95);
+        transform: translate3d(-30px, 30px, 0) scale(0.95);
     }
 }
 
-/* ── Liquid Glass Effect ────────────────────────────────────── */
+/* â”€â”€ Liquid Glass Effect â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 /* Core glass utility with volumetric refraction and depth */
 .top-nav,
 .logo-badge,
@@ -191,7 +188,7 @@ img {
     overflow: hidden;
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
+    border: none;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: var(--glass-shadow), var(--glass-inner-shadow);
 }
@@ -221,7 +218,7 @@ img {
     mix-blend-mode: soft-light;
 }
 
-/* Sharp Refraction Edges - The Bevel Highlight */
+/* Sharp Refraction Edges - The Bevel Highlight (Removed per user request) */
 .top-nav::before,
 .logo-badge::before,
 .upload-zone::before,
@@ -229,37 +226,14 @@ img {
 .scanning-container::before,
 .verdict-banner::before,
 .panel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 1) 0%,
-        rgba(255, 255, 255, 0.4) 15%,
-        rgba(255, 255, 255, 0.1) 40%,
-        rgba(255, 255, 255, 0) 55%,
-        rgba(255, 255, 255, 0.2) 100%
-    );
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    z-index: 3;
-    border-radius: inherit;
-    opacity: 0.9;
+    display: none;
 }
 
 /* Second gloss layer for curvature */
 .logo-badge::before,
 .upload-tabs::before,
 .nav-btn::before {
-    opacity: 1;
+    display: none;
 }
 
 /* Content layer to ensure text readability */
@@ -274,7 +248,7 @@ img {
     z-index: 2;
 }
 
-/* ── Interactive Liquid Ripple ─────────────────────────────── */
+/* â”€â”€ Interactive Liquid Ripple â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .liquid-ripple {
     position: absolute;
     border-radius: 50%;
@@ -297,7 +271,7 @@ img {
     }
 }
 
-/* ── Top Navigation ──────────────────────────────────────────── */
+/* â”€â”€ Top Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .top-nav {
     position: fixed;
     top: 0;
@@ -381,7 +355,7 @@ img {
     padding: 0 5px;
 }
 
-/* ── Hero Section ────────────────────────────────────────────── */
+/* â”€â”€ Hero Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .hero {
     position: relative;
     z-index: 1;
@@ -452,7 +426,7 @@ img {
     font-weight: 600;
 }
 
-/* ── Upload Zone ─────────────────────────────────────────────── */
+/* â”€â”€ Upload Zone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .upload-zone {
     border: 2px dashed rgba(50, 173, 230, 0.20);
     border-radius: 40px;
@@ -493,7 +467,7 @@ img {
     font-size: 0.8rem;
 }
 
-/* ── Upload Mode Tabs ────────────────────────────────────────── */
+/* â”€â”€ Upload Mode Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .upload-tabs {
     display: flex;
     justify-content: center;
@@ -532,7 +506,7 @@ img {
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
-/* ── URL Input Zone ──────────────────────────────────────────── */
+/* â”€â”€ URL Input Zone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .url-input-zone {
     border: 1px solid var(--border);
     border-radius: 50px;
@@ -590,7 +564,7 @@ img {
     margin-top: 10px;
 }
 
-/* ── File Preview ────────────────────────────────────────────── */
+/* â”€â”€ File Preview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .file-preview {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -624,7 +598,7 @@ img {
     font-family: var(--font-mono);
 }
 
-/* ── Batch Preview ───────────────────────────────────────────── */
+/* â”€â”€ Batch Preview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .batch-preview {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -667,7 +641,7 @@ img {
     font-weight: 600;
 }
 
-/* ── Buttons ─────────────────────────────────────────────────── */
+/* â”€â”€ Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .btn-analyze {
     display: inline-flex;
     align-items: center;
@@ -764,7 +738,7 @@ img {
     padding: 0 20px 10px;
 }
 
-/* ── Scanning Animation ──────────────────────────────────────── */
+/* â”€â”€ Scanning Animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .scanning-section {
     position: relative;
     z-index: 1;
@@ -867,7 +841,7 @@ img {
     transition: width 0.3s;
 }
 
-/* ── Batch Results ───────────────────────────────────────────── */
+/* â”€â”€ Batch Results â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .batch-results-section {
     position: relative;
     z-index: 1;
@@ -941,7 +915,7 @@ img {
     margin-top: 4px;
 }
 
-/* ── Results Section ─────────────────────────────────────────── */
+/* â”€â”€ Results Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .results-section {
     position: relative;
     z-index: 1;
@@ -955,7 +929,7 @@ img {
     padding: 30px 0;
 }
 
-/* ── Verdict Banner ──────────────────────────────────────────── */
+/* â”€â”€ Verdict Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .verdict-banner {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -1037,7 +1011,7 @@ img {
     flex: 1;
 }
 
-/* ── Panels ──────────────────────────────────────────────────── */
+/* â”€â”€ Panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .panels-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1157,7 +1131,7 @@ img {
     margin: 16px 0 8px;
 }
 
-/* ── CNN ─────────────────────────────────────────────────────── */
+/* â”€â”€ CNN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .cnn-prediction {
     display: flex;
     align-items: center;
@@ -1179,7 +1153,7 @@ img {
     color: var(--text-muted);
 }
 
-/* ── Metadata ────────────────────────────────────────────────── */
+/* â”€â”€ Metadata â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .meta-flags {
     display: flex;
     flex-direction: column;
@@ -1245,7 +1219,7 @@ img {
     word-break: break-all;
 }
 
-/* ── History Section ─────────────────────────────────────────── */
+/* â”€â”€ History Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .history-section {
     position: relative;
     z-index: 1;
@@ -1336,7 +1310,7 @@ img {
     font-size: 0.9rem;
 }
 
-/* ── Comparison Section ──────────────────────────────────────── */
+/* â”€â”€ Comparison Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .compare-section {
     position: relative;
     z-index: 1;
@@ -1460,7 +1434,7 @@ img {
     max-height: 280px;
 }
 
-/* ── Footer ──────────────────────────────────────────────────── */
+/* â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .footer {
     text-align: center;
     padding: 30px;
@@ -1469,12 +1443,12 @@ img {
     border-top: 1px solid var(--border);
 }
 
-/* ── Utilities ───────────────────────────────────────────────── */
+/* â”€â”€ Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .hidden {
     display: none !important;
 }
 
-/* ── Responsive ──────────────────────────────────────────────── */
+/* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /* Large tablets / small desktops */
 @media (max-width: 1200px) {
@@ -2087,4 +2061,109 @@ img {
     .history-card:hover {
         transform: none;
     }
+}
+
+/* ── Liquid Theme Transition (Perfected) ────────────────────────── */
+.theme-droplet {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(100, 200, 255, 0.4));
+    border-radius: 50%;
+    z-index: 10001;
+    pointer-events: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 0 12px rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    transition: transform 1.2s cubic-bezier(0.5, 0, 0.2, 1);
+    filter: brightness(1.1) saturate(1.2);
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+@keyframes droplet-impact {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(5); opacity: 0; border-width: 0; }
+}
+
+.droplet-impact-effect {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--indigo);
+    border-radius: 50%;
+    z-index: 10001;
+    pointer-events: none;
+    animation: droplet-impact 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* View Transition API Polish */
+::view-transition-group(root) {
+    animation-duration: 1.5s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-new(root) {
+    animation: reveal-diagonal 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    mix-blend-mode: normal;
+    will-change: clip-path;
+}
+
+::view-transition-old(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+@keyframes reveal-diagonal {
+    from {
+        clip-path: circle(0% at 100% 100%);
+    }
+    to {
+        clip-path: circle(150% at 100% 100%);
+    }
+}
+
+/* ── Specula Logo Animation ────────────────────────────── */
+.specula-logo {
+    overflow: visible;
+}
+
+.specula-logo .specula-inner {
+    transform-origin: 50% 50%;
+    animation: specula-spin 12s linear infinite;
+}
+
+.specula-logo .specula-core {
+    transform-origin: 50% 50%;
+    animation: specula-pulse 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes specula-spin {
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes specula-pulse {
+    0% { transform: scale(0.85); opacity: 0.7; filter: drop-shadow(0 0 2px var(--indigo)); }
+    100% { transform: scale(1.4); opacity: 1; filter: drop-shadow(0 0 6px var(--teal)); }
+}
+
+/* ── 3D Heatmap Containers ─────────────────────────────────── */
+.panel-visual {
+    position: relative;
+    min-height: 280px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.15);
+    margin-top: 12px;
+}
+
+.panel-visual canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 16px;
+    cursor: grab;
+}
+
+.panel-visual canvas:active {
+    cursor: grabbing;
 }

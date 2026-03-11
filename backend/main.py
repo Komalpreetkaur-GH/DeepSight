@@ -1,5 +1,6 @@
 """
-DeepSight — Deepfake Forensics Toolkit
+Specula — Deepfake Forensics Toolkit
+FastAPI Backend
 ========================================
 FastAPI backend serving the forensic analysis pipeline
 and the web frontend.
@@ -43,8 +44,8 @@ def sanitize_for_json(obj):
 # ── App Setup ────────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="DeepSight — Deepfake Forensics Toolkit",
-    description="AI-powered image forensics that detects and explains deepfakes",
+    title="Specula — Deepfake Forensics Toolkit",
+    description="Backend API for image and batch forensic analysis. that detects and explains deepfakes",
     version="1.0.0",
 )
 
@@ -73,12 +74,17 @@ async def root():
     index_path = FRONTEND_DIR / "index.html"
     if index_path.exists():
         return FileResponse(index_path)
-    return {"message": "DeepSight API is running. Frontend not found at expected path."}
+    return {"message": "Specula API is running. Frontend not found at expected path."}
+
+
+@app.get("/api")
+async def api_root():
+    return {"message": "Specula API is running. Frontend not found at expected path."}
 
 
 @app.get("/api/health")
-async def health():
-    return {"status": "healthy", "service": "DeepSight Forensics Toolkit"}
+async def health_check():
+    return {"status": "healthy", "service": "Specula Forensics Toolkit"}
 
 
 @app.post("/api/analyze")
@@ -207,7 +213,7 @@ async def generate_report_endpoint(file: UploadFile = File(...)):
         return StreamingResponse(
             io.BytesIO(pdf_bytes),
             media_type="application/pdf",
-            headers={"Content-Disposition": f'attachment; filename="DeepSight_Report_{file.filename}.pdf"'},
+            headers={"Content-Disposition": f'attachment; filename="Specula_Report_{file.filename}.pdf"'},
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")

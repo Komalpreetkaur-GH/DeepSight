@@ -1,5 +1,5 @@
 /**
- * DeepSight — Deepfake Forensics Toolkit
+ * Specula — Deepfake Forensics Toolkit
  * Frontend Application Logic
  * ================================================
  * Features: single / batch analysis, PDF export,
@@ -117,7 +117,7 @@ let compareSlotTarget = null; // 'a' or 'b'
 let compareDataA = null;
 let compareDataB = null;
 
-const HISTORY_KEY = "deepsight_history";
+const HISTORY_KEY = "specula_history";
 const MAX_HISTORY = 20;
 
 // ── History Manager ─────────────────────────────────────────────
@@ -458,8 +458,8 @@ dom.downloadPdfBtn.addEventListener("click", async () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `DeepSight_Report_${currentAnalysisData?.filename || "analysis"}.pdf`;
-        a.click();
+        a.download = `Specula_Report_${currentAnalysisData?.filename || "analysis"}.pdf`;
+        document.body.appendChild(a);
         URL.revokeObjectURL(url);
     } catch (e) {
         alert(`PDF generation failed: ${e.message}`);
@@ -727,13 +727,25 @@ function renderCNN(data) {
         <span class="pred-confidence">${data.confidence}% confidence</span>
     `;
     dom.cnnDescription.textContent = data.description;
-    if (data.gradcam_b64) dom.cnnGradcam.innerHTML = `<img src="data:image/png;base64,${data.gradcam_b64}" alt="Grad-CAM">`;
+    if (data.gradcam_b64) {
+        if (typeof render3DHeatmap === "function") {
+            render3DHeatmap("cnn-gradcam", data.gradcam_b64, 0x32ade6);
+        } else {
+            dom.cnnGradcam.innerHTML = `<img src="data:image/png;base64,${data.gradcam_b64}" alt="Grad-CAM">`;
+        }
+    }
 }
 
 function renderELA(data) {
     setScoreBadge(dom.elaScoreBadge, data.score);
     dom.elaDescription.textContent = data.description;
-    if (data.heatmap_b64) dom.elaHeatmap.innerHTML = `<img src="data:image/png;base64,${data.heatmap_b64}" alt="ELA heatmap">`;
+    if (data.heatmap_b64) {
+        if (typeof render3DHeatmap === "function") {
+            render3DHeatmap("ela-heatmap", data.heatmap_b64, 0xff6b4a);
+        } else {
+            dom.elaHeatmap.innerHTML = `<img src="data:image/png;base64,${data.heatmap_b64}" alt="ELA heatmap">`;
+        }
+    }
 }
 
 function renderFrequency(data) {
@@ -770,7 +782,13 @@ function renderFrequencyChart(profileData) {
 function renderNoise(data) {
     setScoreBadge(dom.noiseScoreBadge, data.score);
     dom.noiseDescription.textContent = data.description;
-    if (data.noise_map_b64) dom.noiseMap.innerHTML = `<img src="data:image/png;base64,${data.noise_map_b64}" alt="Noise map">`;
+    if (data.noise_map_b64) {
+        if (typeof render3DHeatmap === "function") {
+            render3DHeatmap("noise-map", data.noise_map_b64, 0x30d158);
+        } else {
+            dom.noiseMap.innerHTML = `<img src="data:image/png;base64,${data.noise_map_b64}" alt="Noise map">`;
+        }
+    }
 }
 
 function renderMetadata(data) {
@@ -965,36 +983,31 @@ function toggleTheme(e) {
     droplet.style.top = `${startY - 10}px`;
     document.body.appendChild(droplet);
     
-    // 2. Animate Fall to center
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
+    // 2. Animate Fall (Vertical to Bottom)
+    const viewHeight = window.innerHeight;
+    const fallDistance = viewHeight - startY;
+    const impactX = startX;
+    const impactY = viewHeight; 
     
     requestAnimationFrame(() => {
-        droplet.style.transform = `translate(${centerX - startX}px, ${centerY - startY}px) scale(0.5)`;
+        requestAnimationFrame(() => {
+            droplet.style.transform = `translateY(${fallDistance}px) scale(0.6)`;
+        });
     });
     
-    // 3. Impact & Expand
+    // 3. Impact & Perform View Transition
     setTimeout(() => {
-        // Impact effect
+        // Impact effect at bottom
         const impact = document.createElement('div');
         impact.className = 'droplet-impact-effect';
-        impact.style.left = `${centerX - 20}px`;
-        impact.style.top = `${centerY - 20}px`;
+        impact.style.left = `${impactX - 20}px`;
+        impact.style.top = `${impactY - 20}px`;
         document.body.appendChild(impact);
         droplet.remove();
         
-        // Create Transition Overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'theme-ripple-overlay';
-        if (targetTheme === 'dark') overlay.setAttribute('data-theme', 'dark');
-        document.body.appendChild(overlay);
-        
-        // Trigger reveal
-        setTimeout(() => {
-            overlay.classList.add('active');
-            
-            // Swap actual theme halfway through
-            setTimeout(() => {
+        // Use modern View Transition API for flicker-free reveal
+        if (document.startViewTransition) {
+            document.startViewTransition(() => {
                 if (targetTheme === 'dark') {
                     document.documentElement.setAttribute('data-theme', 'dark');
                 } else {
@@ -1002,16 +1015,22 @@ function toggleTheme(e) {
                 }
                 localStorage.setItem('theme', targetTheme);
                 updateThemeIcons();
-            }, 600);
-            
-            // Cleanup
-            setTimeout(() => {
-                overlay.remove();
-                impact.remove();
-            }, 1300);
-        }, 50);
+            });
+        } else {
+            // Fallback for older browsers
+            if (targetTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            localStorage.setItem('theme', targetTheme);
+            updateThemeIcons();
+        }
+
+        // Cleanup impact
+        setTimeout(() => impact.remove(), 1000);
         
-    }, 800);
+    }, 1200); // Wait for the long fall
 }
 
 function updateThemeIcons() {
