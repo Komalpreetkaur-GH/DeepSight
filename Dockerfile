@@ -1,32 +1,37 @@
 # ══════════════════════════════════════════════════════════════
 # Specula — Deepfake Forensics Toolkit
-# Dockerfile for Hugging Face Spaces
+# Dockerfile for Hugging Face Spaces (Robust PyTorch Build)
 # ══════════════════════════════════════════════════════════════
 
-FROM python:3.11-slim
+FROM python:3.11
 
+# Set environment
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=1
 
 WORKDIR /app
 
-# System dependencies for OpenCV
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 \
+    libgl1-mesa-glx \
     libglib2.0-0 \
     libgomp1 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first (for layer caching)
-COPY requirements-deploy.txt /app/requirements-deploy.txt
+# 1. Update pip and install PyTorch CPU first (Critical)
+RUN pip install --upgrade pip
+RUN pip install torch==2.1.2+cpu torchvision==0.16.2+cpu --index-url https://download.pytorch.org/whl/cpu
 
-# Install all Python packages together so pip can resolve conflicts
-# torch CPU is specified directly in requirements-deploy.txt via --extra-index-url
-RUN pip install \
-    --extra-index-url https://download.pytorch.org/whl/cpu \
-    -r /app/requirements-deploy.txt
+# 2. Install everything else AFTER torch is in place
+COPY requirements-deploy.txt /app/requirements-deploy.txt
+# Remove torch entries from requirements to prevent re-install
+RUN sed -i '/torch/d' /app/requirements-deploy.txt
+RUN pip install -r /app/requirements-deploy.txt
 
 # Copy the full project
 COPY . /app

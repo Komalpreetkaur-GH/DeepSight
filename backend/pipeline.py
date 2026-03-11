@@ -77,8 +77,11 @@ class ForensicPipeline:
                 errors[key] = str(e)
                 results[key] = {
                     "score": 0.5,
+                    "prediction": "Error",
+                    "confidence": 0,
                     "description": f"Analysis failed: {str(e)}",
                     "error": True,
+                    "gradcam_b64": None
                 }
 
         # Compute unified verdict
