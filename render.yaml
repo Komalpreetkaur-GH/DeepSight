@@ -1,0 +1,14 @@
+# ══════════════════════════════════════════════════════════════
+# Specula — Render Blueprint
+# https://render.com/docs/blueprint-spec
+# ══════════════════════════════════════════════════════════════
+services:
+  - type: web
+    name: specula
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 10000
+    healthCheckPath: /api/health

@@ -1,0 +1,14 @@
+# Specula — Deploy Requirements (CPU-only, no torch/torchvision)
+# PyTorch CPU is installed separately in the Dockerfile
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+python-multipart==0.0.12
+opencv-python-headless==4.10.0.84
+Pillow==10.4.0
+numpy==1.26.4
+scipy==1.14.0
+timm==1.0.9
+transformers==4.44.0
+pywt==1.7.0
+reportlab>=4.0
+requests>=2.31.0
