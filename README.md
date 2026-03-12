@@ -231,8 +231,6 @@ The weighted average determines the final verdict:
 
 <div align="center">
 
-**Built for truth in the age of AI.**
-
 Made with 🧠 by [Komalpreetkaur-GH](https://github.com/Komalpreetkaur-GH)
 
 </div>
