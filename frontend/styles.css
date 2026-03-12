@@ -119,6 +119,14 @@ img {
     z-index: 0;
 }
 
+#particle-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.35;
+}
+
 .orb {
     position: absolute;
     border-radius: 50%;
@@ -200,7 +208,8 @@ img {
 .url-input-zone::after,
 .scanning-container::after,
 .verdict-banner::after,
-.panel::after {
+.panel::after,
+.glass-tilt::after {
     content: '';
     position: absolute;
     top: -50%;
@@ -218,22 +227,129 @@ img {
     mix-blend-mode: soft-light;
 }
 
-/* Sharp Refraction Edges - The Bevel Highlight (Removed per user request) */
-.top-nav::before,
-.logo-badge::before,
-.upload-zone::before,
-.url-input-zone::before,
-.scanning-container::before,
-.verdict-banner::before,
-.panel::before {
+/* â”€â”€ Interactive 3D Glass Tilt ─────────────────────────────────── */
+.glass-tilt {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    will-change: transform;
+    transition: transform 0.1s ease-out; /* Snap back is faster than tilt */
+}
+
+/* Specular Glint Highlight - High-end light reflection */
+.glass-tilt::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.45) 0%,
+        rgba(255, 255, 255, 0) 60%
+    );
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 5;
+    mix-blend-mode: overlay;
+}
+
+.glass-tilt:hover::before {
+    opacity: 1;
+}
+
+/* â”€â”€ Orchestrated reveal animations ──────────────────────────── */
+@keyframes glassReveal {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        backdrop-filter: var(--glass-blur);
+    }
+}
+
+.reveal-item {
+    opacity: 0;
+}
+
+.reveal-active {
+    animation: glassReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Delay Utlities */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* â”€â”€ Skeleton Loading Shimmer ─────────────────────────────── */
+.skeleton {
+    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 4px;
+}
+
+@keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+.skeleton-text { height: 12px; margin-bottom: 8px; width: 100%; }
+.skeleton-text.short { width: 60%; }
+.skeleton-img { width: 100%; height: 160px; border-radius: var(--radius-sm); }
+.skeleton-badge { width: 60px; height: 24px; border-radius: 12px; }
+
+/* Hide content when skeleton is active */
+.loading-skeleton .panel-content-actual {
+    display: none;
+}
+.loading-skeleton .panel-content-skeleton {
+    display: block;
+}
+.panel-content-skeleton {
     display: none;
 }
 
-/* Second gloss layer for curvature */
-.logo-badge::before,
-.upload-tabs::before,
-.nav-btn::before {
-    display: none;
+/* â”€â”€ Progressive Disclosure ───────────────────────────────── */
+.disclosure-controls {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0 40px;
+}
+
+.panels-grid.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    margin-top: -20px;
+}
+
+.panels-grid.expanded {
+    max-height: 5000px; /* High enough for all panels */
+    overflow: visible;
+    opacity: 1;
+    pointer-events: auto;
+    margin-top: 0;
+}
+
+#btn-deep-dive svg {
+    transition: transform 0.4s;
+}
+
+.expanded #btn-deep-dive svg {
+    transform: rotate(180deg);
 }
 
 /* Content layer to ensure text readability */

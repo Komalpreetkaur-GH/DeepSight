@@ -658,13 +658,35 @@ function renderCompareChart() {
 // ── Render Results (single) ─────────────────────────────────────
 function renderResults(data) {
     showSection("results");
+    
+    const panels = $$(".panel");
+    const revealItems = $$(".reveal-item");
+    
+    // 1. Reset reveal animations, show skeletons, and collapse deep dive
+    revealItems.forEach(item => item.classList.remove("reveal-active"));
+    panels.forEach(p => p.classList.add("loading-skeleton"));
+    resetDeepDive();
+
+    // 2. Trigger reveal sequence
+    requestAnimationFrame(() => {
+        revealItems.forEach(item => item.classList.add("reveal-active"));
+    });
+
+    // 3. Populate data (verdict is usually shown first)
     const { analyzers, verdict, total_time_ms, image_size } = data;
     renderVerdict(verdict, total_time_ms, image_size);
-    if (analyzers.cnn) renderCNN(analyzers.cnn);
-    if (analyzers.ela) renderELA(analyzers.ela);
-    if (analyzers.frequency) renderFrequency(analyzers.frequency);
-    if (analyzers.noise) renderNoise(analyzers.noise);
-    if (analyzers.metadata) renderMetadata(analyzers.metadata);
+
+    // 4. Simulate a tiny "processing" delay for effect, then hide skeletons
+    setTimeout(() => {
+        if (analyzers.cnn) renderCNN(analyzers.cnn);
+        if (analyzers.ela) renderELA(analyzers.ela);
+        if (analyzers.frequency) renderFrequency(analyzers.frequency);
+        if (analyzers.noise) renderNoise(analyzers.noise);
+        if (analyzers.metadata) renderMetadata(analyzers.metadata);
+        
+        panels.forEach(p => p.classList.remove("loading-skeleton"));
+    }, 800);
+
     dom.results.scrollIntoView({ behavior: "smooth" });
 }
 
@@ -1051,11 +1073,149 @@ function initTheme() {
     updateThemeIcons();
 }
 
+// ── Interactive Glass Tilt Logic ────────────────────────────────
+function initTiltEffect() {
+    const tiltElements = document.querySelectorAll(".glass-tilt");
+
+    tiltElements.forEach(el => {
+        el.addEventListener("mousemove", (e) => {
+            const rect = el.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Set variables for the specular glint
+            el.style.setProperty("--mouse-x", `${(x / rect.width) * 100}%`);
+            el.style.setProperty("--mouse-y", `${(y / rect.height) * 100}%`);
+
+            // Calculate rotation (max 10 degrees)
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = ((y - centerY) / centerY) * -10;
+            const rotateY = ((x - centerX) / centerX) * 10;
+
+            el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+
+        el.addEventListener("mouseleave", () => {
+            el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+        });
+    });
+}
+
+// ── Progressive Disclosure Logic ───────────────────────────────
+function initDeepDive() {
+    const btn = document.getElementById("btn-deep-dive");
+    const grid = document.getElementById("panels-grid");
+    
+    if (!btn || !grid) return;
+    
+    btn.addEventListener("click", () => {
+        const isExpanded = grid.classList.contains("expanded");
+        if (isExpanded) {
+            grid.classList.remove("expanded");
+            grid.classList.add("collapsed");
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg> Show Detailed Forensic Analysis`;
+        } else {
+            grid.classList.remove("collapsed");
+            grid.classList.add("expanded");
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="18 15 12 9 6 15"/></svg> Hide Detailed Analysis`;
+        }
+    });
+}
+
+function resetDeepDive() {
+    const btn = document.getElementById("btn-deep-dive");
+    const grid = document.getElementById("panels-grid");
+    if (grid) {
+        grid.classList.remove("expanded");
+        grid.classList.add("collapsed");
+    }
+    if (btn) {
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg> Show Detailed Forensic Analysis`;
+    }
+}
+
+// ── Liquid Particle Background ──────────────────────────────────
+function initLiquidParticles() {
+    const canvas = document.getElementById("particle-canvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+    let w, h;
+
+    const resize = () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", resize);
+    resize();
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+        reset() {
+            this.x = Math.random() * w;
+            this.y = Math.random() * h;
+            this.size = Math.random() * 2 + 0.5;
+            this.vx = (Math.random() - 0.5) * 0.4;
+            this.vy = (Math.random() - 0.5) * 0.4;
+            this.alpha = Math.random() * 0.5 + 0.2;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0 || this.x > w || this.y < 0 || this.y > h) this.reset();
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(50, 173, 230, ${this.alpha})`;
+            ctx.fill();
+        }
+    }
+
+    const init = () => {
+        particles = [];
+        for (let i = 0; i < 60; i++) particles.push(new Particle());
+    };
+    init();
+
+    const animate = () => {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animate);
+    };
+    animate();
+
+    // Mouse interaction: move particles away
+    window.addEventListener("mousemove", (e) => {
+        const mx = e.clientX;
+        const my = e.clientY;
+        particles.forEach(p => {
+            const dx = p.x - mx;
+            const dy = p.y - my;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 150) {
+                const force = (150 - dist) / 150;
+                p.x += dx * force * 0.1;
+                p.y += dy * force * 0.1;
+            }
+        });
+    });
+}
+
 // ── Initialization ──────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     updateHistoryBadge();
     initInteractions();
+    initTiltEffect();
+    initDeepDive();
+    initLiquidParticles();
     
     // Smooth scroll for nav links if added later
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

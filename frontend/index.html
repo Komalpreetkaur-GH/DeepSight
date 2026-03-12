@@ -19,6 +19,7 @@
 <body>
     <!-- Ambient Background -->
     <div class="ambient-bg">
+        <canvas id="particle-canvas"></canvas>
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
@@ -96,7 +97,7 @@
             </div>
 
             <!-- Upload Zone -->
-            <div id="upload-zone" class="upload-zone">
+            <div id="upload-zone" class="upload-zone glass-tilt">
                 <div class="upload-zone-inner">
                     <div class="upload-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -114,7 +115,7 @@
             </div>
 
             <!-- URL Input -->
-            <div id="url-input-zone" class="url-input-zone hidden">
+            <div id="url-input-zone" class="url-input-zone glass-tilt hidden">
                 <div class="url-input-inner">
                     <div class="url-input-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
@@ -217,7 +218,7 @@
             </button>
         </div>
         <!-- Verdict Banner -->
-        <div id="verdict-banner" class="verdict-banner">
+        <div id="verdict-banner" class="verdict-banner glass-tilt reveal-item delay-1">
             <div class="verdict-content">
                 <div class="verdict-gauge-container">
                     <canvas id="verdict-gauge" width="200" height="200"></canvas>
@@ -243,9 +244,17 @@
                 </div>
             </div>
         </div>
+        
+        <div class="disclosure-controls reveal-item delay-2">
+            <button id="btn-deep-dive" class="btn-action">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+                Show Detailed Forensic Analysis
+            </button>
+        </div>
+
         <!-- Analysis Panels Grid -->
-        <div class="panels-grid">
-            <div id="panel-cnn" class="panel panel-cnn">
+        <div id="panels-grid" class="panels-grid collapsed">
+            <div id="panel-cnn" class="panel panel-cnn glass-tilt reveal-item delay-2">
                 <div class="panel-header">
                     <div class="panel-icon cnn-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
@@ -259,13 +268,20 @@
                     <div id="cnn-score-badge" class="score-badge">—</div>
                 </div>
                 <div class="panel-body">
-                    <div id="cnn-prediction" class="cnn-prediction"></div>
-                    <p id="cnn-description" class="panel-description"></p>
-                    <div id="cnn-gradcam" class="panel-visual"></div>
-                    <p class="visual-caption">Grad-CAM: Highlighted regions influenced the AI's decision</p>
+                    <div class="panel-content-skeleton">
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-text short"></div>
+                        <div class="skeleton-img"></div>
+                    </div>
+                    <div class="panel-content-actual">
+                        <div id="cnn-prediction" class="cnn-prediction"></div>
+                        <p id="cnn-description" class="panel-description"></p>
+                        <div id="cnn-gradcam" class="panel-visual"></div>
+                        <p class="visual-caption">Grad-CAM: Highlighted regions influenced the AI's decision</p>
+                    </div>
                 </div>
             </div>
-            <div id="panel-ela" class="panel panel-ela">
+            <div id="panel-ela" class="panel panel-ela glass-tilt reveal-item delay-3">
                 <div class="panel-header">
                     <div class="panel-icon ela-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
@@ -282,12 +298,18 @@
                     <div id="ela-score-badge" class="score-badge">—</div>
                 </div>
                 <div class="panel-body">
-                    <p id="ela-description" class="panel-description"></p>
-                    <div id="ela-heatmap" class="panel-visual"></div>
-                    <p class="visual-caption">Brighter regions indicate different compression histories</p>
+                    <div class="panel-content-skeleton">
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-img"></div>
+                    </div>
+                    <div class="panel-content-actual">
+                        <p id="ela-description" class="panel-description"></p>
+                        <div id="ela-heatmap" class="panel-visual"></div>
+                        <p class="visual-caption">Brighter regions indicate different compression histories</p>
+                    </div>
                 </div>
             </div>
-            <div id="panel-frequency" class="panel panel-freq">
+            <div id="panel-frequency" class="panel panel-freq glass-tilt reveal-item delay-4">
                 <div class="panel-header">
                     <div class="panel-icon freq-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
@@ -300,14 +322,21 @@
                     <div id="freq-score-badge" class="score-badge">—</div>
                 </div>
                 <div class="panel-body">
-                    <p id="freq-description" class="panel-description"></p>
-                    <div id="freq-spectrum" class="panel-visual"></div>
-                    <p class="visual-caption">2D Fourier transform — unusual patterns suggest AI generation</p>
-                    <div class="chart-container"><canvas id="freq-chart"></canvas></div>
-                    <p class="visual-caption">Radial power spectrum profile</p>
+                    <div class="panel-content-skeleton">
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-img"></div>
+                        <div class="skeleton-text short" style="margin-top:20px"></div>
+                    </div>
+                    <div class="panel-content-actual">
+                        <p id="freq-description" class="panel-description"></p>
+                        <div id="freq-spectrum" class="panel-visual"></div>
+                        <p class="visual-caption">2D Fourier transform — unusual patterns suggest AI generation</p>
+                        <div class="chart-container"><canvas id="freq-chart"></canvas></div>
+                        <p class="visual-caption">Radial power spectrum profile</p>
+                    </div>
                 </div>
             </div>
-            <div id="panel-noise" class="panel panel-noise">
+            <div id="panel-noise" class="panel panel-noise glass-tilt reveal-item delay-5">
                 <div class="panel-header">
                     <div class="panel-icon noise-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
@@ -323,12 +352,18 @@
                     <div id="noise-score-badge" class="score-badge">—</div>
                 </div>
                 <div class="panel-body">
-                    <p id="noise-description" class="panel-description"></p>
-                    <div id="noise-map" class="panel-visual"></div>
-                    <p class="visual-caption">Noise variance map — uniform = consistent = likely real</p>
+                    <div class="panel-content-skeleton">
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-img"></div>
+                    </div>
+                    <div class="panel-content-actual">
+                        <p id="noise-description" class="panel-description"></p>
+                        <div id="noise-map" class="panel-visual"></div>
+                        <p class="visual-caption">Noise variance map — uniform = consistent = likely real</p>
+                    </div>
                 </div>
             </div>
-            <div id="panel-metadata" class="panel panel-meta">
+            <div id="panel-metadata" class="panel panel-meta glass-tilt reveal-item delay-5">
                 <div class="panel-header">
                     <div class="panel-icon meta-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
@@ -342,9 +377,16 @@
                     <div id="meta-score-badge" class="score-badge">—</div>
                 </div>
                 <div class="panel-body">
-                    <p id="meta-description" class="panel-description"></p>
-                    <div id="meta-flags" class="meta-flags"></div>
-                    <div id="meta-details" class="meta-details"></div>
+                    <div class="panel-content-skeleton">
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-text short"></div>
+                    </div>
+                    <div class="panel-content-actual">
+                        <p id="meta-description" class="panel-description"></p>
+                        <div id="meta-flags" class="meta-flags"></div>
+                        <div id="meta-details" class="meta-details"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -377,7 +419,7 @@
         </div>
         <p class="compare-subtitle">Select two previously analyzed images from your history to compare side-by-side.</p>
         <div class="compare-slots">
-            <div class="compare-slot" id="compare-slot-a">
+            <div class="compare-slot glass-tilt" id="compare-slot-a">
                 <div class="compare-slot-label">Image A</div>
                 <div id="compare-picker-a" class="compare-picker">
                     <p>Click to select from history</p>
