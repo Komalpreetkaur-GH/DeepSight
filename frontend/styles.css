@@ -764,7 +764,7 @@ img {
 
 .scan-visual {
     position: relative;
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     margin-bottom: 24px;
     border: 1px solid rgba(255, 255, 255, 0.4);
@@ -1249,7 +1249,7 @@ img {
 .history-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     cursor: pointer;
     transition: all 0.3s;
