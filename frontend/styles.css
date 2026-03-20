@@ -1243,16 +1243,6 @@ img {
     position: relative;
 }
 
-.panel::before {
-    content: '[ SCAN_MODULE_01 ]';
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    opacity: 0.3;
-    pointer-events: none;
-}
 
 .panel:hover {
     border-color: rgba(255, 255, 255, 0.7);
