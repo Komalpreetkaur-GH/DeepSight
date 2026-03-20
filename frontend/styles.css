@@ -349,48 +349,7 @@ img {
     margin-top: 32px;
 }
 
-.panel-visual {
-    position: relative;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--border);
-    margin-top: 12px;
-    cursor: crosshair;
-}
 
-.btn-zoom-visual {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 26px;
-    height: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(10, 12, 18, 0.5);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    color: #fff;
-    cursor: pointer;
-    z-index: 10;
-    opacity: 0;
-    transform: scale(0.9);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.panel-visual:hover .btn-zoom-visual {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.btn-zoom-visual:hover {
-    background: var(--blue);
-    border-color: var(--aqua);
-    box-shadow: 0 0 15px rgba(50, 173, 230, 0.4);
-}
 
 /* Modal Zoom */
 .zoom-modal {
@@ -2402,27 +2361,94 @@ img {
     100% { transform: scale(1.4); opacity: 1; filter: drop-shadow(0 0 6px var(--teal)); }
 }
 
-/* ── 3D Heatmap Containers ─────────────────────────────────── */
+/* ── 3D Heatmap & Visual Alignment ───────────────────────────── */
+.panel-info-group {
+    min-height: 140px; /* Aligns all images horizontally by equalizing text height */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
 .panel-visual {
     position: relative;
-    min-height: 280px;
+    height: 280px; /* Fixed height for consistent grid alignment */
     border-radius: var(--radius-sm);
     overflow: hidden;
     background: rgba(0, 0, 0, 0.15);
-    margin-top: 12px;
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    cursor: crosshair;
 }
 
-.panel-visual canvas {
+.panel-visual img, .panel-visual canvas {
     display: block;
     width: 100% !important;
     height: 100% !important;
+    object-fit: contain;
     border-radius: var(--radius-sm);
+}
+
+.panel-visual canvas {
     cursor: grab;
 }
 
 .panel-visual canvas:active {
     cursor: grabbing;
 }
+
+/* ── Refined Zoom Button ───────────────────────────────────────── */
+.btn-zoom-visual {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--blue);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    z-index: 100;
+    opacity: 0.8 !important; /* Always visible but subtle */
+    transform: scale(1);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.panel-visual:hover .btn-zoom-visual {
+    opacity: 1 !important;
+    background: var(--aqua);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(0, 188, 235, 0.5);
+}
+
+.btn-zoom-visual::after {
+    content: 'ZOOM';
+    position: absolute;
+    right: 48px;
+    background: var(--blue);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-zoom-visual:hover::after {
+    opacity: 1;
+    transform: translateX(-8px);
+}
+
 
 /* ── Results Footer ────────────────────────────────────────────── */
 .results-footer {
