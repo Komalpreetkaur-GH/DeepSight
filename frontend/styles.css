@@ -344,10 +344,20 @@ img {
 
 .panels-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(2, 1fr); /* Force 2-column layout on desktop */
+    gap: 32px;
     margin-top: 32px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
 }
+
+@media (max-width: 1024px) {
+    .panels-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 
 
 
@@ -2402,7 +2412,7 @@ img {
 
 .panel-visual {
     position: relative;
-    height: 280px; /* Fixed height for consistent grid alignment */
+    height: 380px; /* Increased height for better detail */
     border-radius: var(--radius-sm);
     overflow: hidden;
     background: rgba(0, 0, 0, 0.15);
@@ -2427,57 +2437,92 @@ img {
     cursor: grabbing;
 }
 
-/* ── Refined Zoom Button ───────────────────────────────────────── */
-.btn-zoom-visual {
+/* ── Refined Zoom Button Group ──────────────────────────────────── */
+.btn-zoom-group {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 40px;
-    height: 40px;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.panel-visual:hover .btn-zoom-group {
+    opacity: 1;
+}
+
+.btn-zoom-action {
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--blue);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 50%;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
     color: #fff;
     cursor: pointer;
-    z-index: 100;
-    opacity: 0.8 !important; /* Always visible but subtle */
-    transform: scale(1);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.panel-visual:hover .btn-zoom-visual {
-    opacity: 1 !important;
+.btn-zoom-action:hover {
     background: var(--aqua);
     transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(0, 188, 235, 0.5);
+    box-shadow: 0 0 15px rgba(0, 188, 235, 0.4);
 }
 
-.btn-zoom-visual::after {
-    content: 'ZOOM';
+.zoom-in { order: 1; }
+.zoom-out { order: 2; }
+
+/* ── Modal Zoom Controls ───────────────────────────────────────── */
+.zoom-controls {
     position: absolute;
-    right: 48px;
-    background: var(--blue);
-    padding: 6px 12px;
-    border-radius: var(--radius-sm);
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 10px 24px;
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
-.btn-zoom-visual:hover::after {
+.zoom-control-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zoom-control-btn:hover {
     opacity: 1;
-    transform: translateX(-8px);
+    transform: scale(1.2);
+}
+
+.zoom-level {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    min-width: 60px;
+    text-align: center;
 }
 
 

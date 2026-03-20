@@ -272,9 +272,14 @@
                             <p id="cnn-description" class="panel-description"></p>
                         </div>
                         <div id="cnn-gradcam" class="panel-visual">
-                            <button class="btn-zoom-visual" title="Zoom In / Maximize">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                            </button>
+                            <div class="btn-zoom-group">
+                                <button class="btn-zoom-action zoom-in" title="Zoom In / Maximize" data-panel="cnn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6"/></svg>
+                                </button>
+                                <button class="btn-zoom-action zoom-out" title="Zoom Out / Restore" data-panel="cnn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM7 10h6"/></svg>
+                                </button>
+                            </div>
                         </div>
                         <p class="visual-caption">Grad-CAM: Highlighted regions influenced the AI's decision</p>
                     </div>
@@ -306,9 +311,14 @@
                             <p id="ela-description" class="panel-description"></p>
                         </div>
                         <div id="ela-heatmap" class="panel-visual">
-                            <button class="btn-zoom-visual" title="Zoom In / Maximize">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                            </button>
+                            <div class="btn-zoom-group">
+                                <button class="btn-zoom-action zoom-in" title="Zoom In / Maximize" data-panel="ela">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6"/></svg>
+                                </button>
+                                <button class="btn-zoom-action zoom-out" title="Zoom Out / Restore" data-panel="ela">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM7 10h6"/></svg>
+                                </button>
+                            </div>
                         </div>
                         <p class="visual-caption">Brighter regions indicate different compression histories</p>
                     </div>
@@ -337,9 +347,14 @@
                             <p id="freq-description" class="panel-description"></p>
                         </div>
                         <div id="freq-spectrum" class="panel-visual">
-                            <button class="btn-zoom-visual" title="Zoom In / Maximize">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                            </button>
+                            <div class="btn-zoom-group">
+                                <button class="btn-zoom-action zoom-in" title="Zoom In / Maximize" data-panel="frequency">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6"/></svg>
+                                </button>
+                                <button class="btn-zoom-action zoom-out" title="Zoom Out / Restore" data-panel="frequency">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM7 10h6"/></svg>
+                                </button>
+                            </div>
                         </div>
                         <p class="visual-caption">2D Fourier transform — unusual patterns suggest AI generation</p>
                         <div class="chart-container"><canvas id="freq-chart"></canvas></div>
@@ -372,9 +387,14 @@
                             <p id="noise-description" class="panel-description"></p>
                         </div>
                         <div id="noise-map" class="panel-visual">
-                            <button class="btn-zoom-visual" title="Zoom In / Maximize">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                            </button>
+                            <div class="btn-zoom-group">
+                                <button class="btn-zoom-action zoom-in" title="Zoom In / Maximize" data-panel="noise">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6"/></svg>
+                                </button>
+                                <button class="btn-zoom-action zoom-out" title="Zoom Out / Restore" data-panel="noise">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM7 10h6"/></svg>
+                                </button>
+                            </div>
                         </div>
                         <p class="visual-caption">Noise variance map — uniform = consistent = likely real</p>
                     </div>
@@ -481,6 +501,15 @@
         <div class="zoom-backdrop" id="zoom-backdrop"></div>
         <div class="zoom-content glass-tilt animate-zoom">
             <button id="zoom-close" class="zoom-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            <div class="zoom-controls">
+                <button id="zoom-in-btn" class="zoom-control-btn" title="Zoom In">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><path d="M12 5v14M5 12h14"/></svg>
+                </button>
+                <div id="zoom-level-indicator" class="zoom-level">100%</div>
+                <button id="zoom-out-btn" class="zoom-control-btn" title="Zoom Out">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><path d="M5 12h14"/></svg>
+                </button>
+            </div>
             <div id="zoom-image-container" class="zoom-image-container"></div>
             <p id="zoom-caption" class="zoom-caption"></p>
         </div>

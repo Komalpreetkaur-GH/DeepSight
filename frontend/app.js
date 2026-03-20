@@ -110,6 +110,9 @@ const dom = {
     zoomClose: $("#zoom-close"),
     zoomImageContainer: $("#zoom-image-container"),
     zoomCaption: $("#zoom-caption"),
+    zoomInBtn: $("#zoom-in-btn"),
+    zoomOutBtn: $("#zoom-out-btn"),
+    zoomLevelIndicator: $("#zoom-level-indicator"),
 };
 
 // ── State ───────────────────────────────────────────────────────
@@ -1175,15 +1178,30 @@ function initLiquidParticles() {
     });
 }
 
-// ── Zoom Image Feature ──────────────────────────────────────────
+// ── Zoom Image Feature (Enhanced) ──────────────────────────────
+let currentZoomScale = 1.0;
+
 function initZoomModal() {
-    const zoomBtns = document.querySelectorAll(".btn-zoom-visual");
+    const zoomActions = document.querySelectorAll(".btn-zoom-action");
     
-    zoomBtns.forEach((btn) => {
+    const updateZoom = (newScale) => {
+        currentZoomScale = Math.min(Math.max(newScale, 0.5), 4.0);
+        const img = dom.zoomImageContainer.querySelector("img");
+        if (img) {
+            img.style.transform = `scale(${currentZoomScale})`;
+            img.style.transition = "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)";
+        }
+        if (dom.zoomLevelIndicator) {
+            dom.zoomLevelIndicator.textContent = `${Math.round(currentZoomScale * 100)}%`;
+        }
+    };
+
+    zoomActions.forEach((btn) => {
         btn.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
             
+            const isZoomIn = btn.classList.contains("zoom-in");
             const panelVisual = btn.closest(".panel-visual");
             const panel = btn.closest(".panel");
             const title = panel ? panel.querySelector(".panel-title").textContent : "Analysis Result";
@@ -1209,6 +1227,9 @@ function initZoomModal() {
                 }
             }
 
+            // Set initial scale based on button clicked
+            updateZoom(isZoomIn ? 1.5 : 1.0);
+
             dom.zoomModal.classList.remove("hidden");
             requestAnimationFrame(() => dom.zoomModal.classList.add("visible"));
         });
@@ -1219,11 +1240,25 @@ function initZoomModal() {
         setTimeout(() => dom.zoomModal.classList.add("hidden"), 400);
     };
 
+    if (dom.zoomInBtn) dom.zoomInBtn.onclick = () => updateZoom(currentZoomScale + 0.25);
+    if (dom.zoomOutBtn) dom.zoomOutBtn.onclick = () => updateZoom(currentZoomScale - 0.25);
     if (dom.zoomClose) dom.zoomClose.addEventListener("click", closeZoom);
     if (dom.zoomBackdrop) dom.zoomBackdrop.addEventListener("click", closeZoom);
+    
     window.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && !dom.zoomModal.classList.contains("hidden")) closeZoom();
+        if (e.key === "+" || e.key === "=") updateZoom(currentZoomScale + 0.25);
+        if (e.key === "-") updateZoom(currentZoomScale - 0.25);
     });
+
+    // Mouse wheel zoom in modal
+    dom.zoomModal.addEventListener("wheel", (e) => {
+        if (dom.zoomModal.classList.contains("visible")) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            updateZoom(currentZoomScale + delta);
+        }
+    }, { passive: false });
 }
 
 // ── Initialization ──────────────────────────────────────────────
