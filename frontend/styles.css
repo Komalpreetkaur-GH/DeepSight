@@ -1434,6 +1434,35 @@ img {
     word-break: break-all;
 }
 
+/* ── Panel Specific Overrides ────────────────────────────────── */
+#panel-metadata {
+    grid-column: 1 / -1; /* Horizontal span */
+}
+
+#panel-metadata .panel-info-group {
+    height: auto;
+    min-height: 0;
+    margin-bottom: 24px;
+}
+
+#panel-metadata .panel-content-actual {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 40px;
+    align-items: start;
+}
+
+#panel-metadata .meta-flags {
+    margin-bottom: 0;
+}
+
+@media (max-width: 1000px) {
+    #panel-metadata .panel-content-actual {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
 /* â”€â”€ History Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .history-section {
     position: relative;
