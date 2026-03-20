@@ -2363,10 +2363,12 @@ img {
 
 /* ── 3D Heatmap & Visual Alignment ───────────────────────────── */
 .panel-info-group {
-    min-height: 140px; /* Aligns all images horizontally by equalizing text height */
+    height: 180px; /* Strict fixed height to guarantee image alignment across all panels */
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center; /* Center text vertically for better balance */
+    margin-bottom: 20px;
+    overflow: hidden; /* Prevent text overflow from pushing images */
 }
 
 .panel-visual {
