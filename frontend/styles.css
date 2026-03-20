@@ -2423,3 +2423,44 @@ img {
 .panel-visual canvas:active {
     cursor: grabbing;
 }
+
+/* ── Results Footer ────────────────────────────────────────────── */
+.results-footer {
+    display: flex;
+    justify-content: center;
+    padding: 60px 0 40px;
+    border-top: 2px solid var(--border);
+    margin-top: 60px;
+    position: relative;
+    z-index: 10;
+}
+
+.btn-new-analysis {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 16px 40px;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: var(--glass-shadow);
+}
+
+.btn-new-analysis:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--indigo);
+    color: var(--indigo);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px rgba(0, 80, 115, 0.15);
+}
+
+.btn-new-analysis svg {
+    color: var(--indigo);
+    opacity: 0.8;
+}
+
