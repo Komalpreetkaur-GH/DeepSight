@@ -17,6 +17,27 @@
 </head>
 
 <body>
+    <!-- ═══ Splash Screen ═══ -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo-container">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1.5" width="80" height="80" class="splash-logo">
+                    <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" stroke-linejoin="round" class="splash-outer" />
+                    <polygon points="12 6 17.5 9 17.5 15 12 18 6.5 15 6.5 9 12 6" class="splash-inner" stroke-linejoin="round" />
+                    <circle cx="12" cy="12" r="2.5" class="splash-core" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="splash-text-container">
+                <h1 class="splash-title">SPECULA</h1>
+                <p class="splash-subtitle">INITIALIZING FORENSIC ENGINE<span class="dot-1">.</span><span class="dot-2">.</span><span class="dot-3">.</span></p>
+            </div>
+            <div class="splash-progress">
+                <div class="splash-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Ambient Background -->
     <div class="ambient-bg">
         <canvas id="particle-canvas"></canvas>

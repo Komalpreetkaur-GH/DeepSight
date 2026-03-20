@@ -1261,8 +1261,29 @@ function initZoomModal() {
     }, { passive: false });
 }
 
+// ── Splash Screen Logic ─────────────────────────────────────────
+function initSplashScreen() {
+    const splash = document.getElementById('splash-screen');
+    if (!splash) return;
+
+    // Prevent scrolling while splash is active
+    document.body.style.overflow = 'hidden';
+
+    // Fade out after 4.5 seconds
+    setTimeout(() => {
+        splash.classList.add('fade-out');
+        document.body.style.overflow = ''; // Restore scrolling
+
+        // Remove element completely after transition (0.8s)
+        setTimeout(() => {
+            splash.remove();
+        }, 800);
+    }, 4500);
+}
+
 // ── Initialization ──────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
+    initSplashScreen();
     initTheme();
     updateHistoryBadge();
     initInteractions();
