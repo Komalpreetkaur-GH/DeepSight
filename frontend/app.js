@@ -105,6 +105,11 @@ const dom = {
     themeToggle: $("#theme-toggle"),
     sunIcon: $(".sun-icon"),
     moonIcon: $(".moon-icon"),
+    zoomModal: $("#zoom-modal"),
+    zoomBackdrop: $("#zoom-backdrop"),
+    zoomClose: $("#zoom-close"),
+    zoomImageContainer: $("#zoom-image-container"),
+    zoomCaption: $("#zoom-caption"),
 };
 
 // ── State ───────────────────────────────────────────────────────
@@ -1170,6 +1175,57 @@ function initLiquidParticles() {
     });
 }
 
+// ── Zoom Image Feature ──────────────────────────────────────────
+function initZoomModal() {
+    const zoomBtns = document.querySelectorAll(".btn-zoom-visual");
+    
+    zoomBtns.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const panelVisual = btn.closest(".panel-visual");
+            const panel = btn.closest(".panel");
+            const title = panel ? panel.querySelector(".panel-title").textContent : "Analysis Result";
+            
+            dom.zoomImageContainer.innerHTML = "";
+            dom.zoomCaption.textContent = title;
+
+            const img = panelVisual.querySelector("img");
+            const canvas = panelVisual.querySelector("canvas");
+
+            if (img) {
+                const clone = document.createElement("img");
+                clone.src = img.src;
+                dom.zoomImageContainer.appendChild(clone);
+            } else if (canvas) {
+                try {
+                    const snapshot = document.createElement("img");
+                    snapshot.src = canvas.toDataURL("image/png");
+                    dom.zoomImageContainer.appendChild(snapshot);
+                    dom.zoomCaption.textContent += " (Static Snapshot)";
+                } catch (err) {
+                    dom.zoomImageContainer.innerHTML = `<p style="color:white; padding: 40px;">Unable to capture 3D snapshot.</p>`;
+                }
+            }
+
+            dom.zoomModal.classList.remove("hidden");
+            requestAnimationFrame(() => dom.zoomModal.classList.add("visible"));
+        });
+    });
+
+    const closeZoom = () => {
+        dom.zoomModal.classList.remove("visible");
+        setTimeout(() => dom.zoomModal.classList.add("hidden"), 400);
+    };
+
+    if (dom.zoomClose) dom.zoomClose.addEventListener("click", closeZoom);
+    if (dom.zoomBackdrop) dom.zoomBackdrop.addEventListener("click", closeZoom);
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !dom.zoomModal.classList.contains("hidden")) closeZoom();
+    });
+}
+
 // ── Initialization ──────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
     initTheme();
@@ -1177,6 +1233,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initInteractions();
     initTiltEffect();
     initLiquidParticles();
+    initZoomModal();
     
     // Smooth scroll for nav links if added later
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

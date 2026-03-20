@@ -269,7 +269,11 @@
                     <div class="panel-content-actual">
                         <div id="cnn-prediction" class="cnn-prediction"></div>
                         <p id="cnn-description" class="panel-description"></p>
-                        <div id="cnn-gradcam" class="panel-visual"></div>
+                        <div id="cnn-gradcam" class="panel-visual">
+                            <button class="btn-zoom-visual" title="Maximize">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                            </button>
+                        </div>
                         <p class="visual-caption">Grad-CAM: Highlighted regions influenced the AI's decision</p>
                     </div>
                 </div>
@@ -297,7 +301,11 @@
                     </div>
                     <div class="panel-content-actual">
                         <p id="ela-description" class="panel-description"></p>
-                        <div id="ela-heatmap" class="panel-visual"></div>
+                        <div id="ela-heatmap" class="panel-visual">
+                            <button class="btn-zoom-visual" title="Maximize">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                            </button>
+                        </div>
                         <p class="visual-caption">Brighter regions indicate different compression histories</p>
                     </div>
                 </div>
@@ -322,7 +330,11 @@
                     </div>
                     <div class="panel-content-actual">
                         <p id="freq-description" class="panel-description"></p>
-                        <div id="freq-spectrum" class="panel-visual"></div>
+                        <div id="freq-spectrum" class="panel-visual">
+                            <button class="btn-zoom-visual" title="Maximize">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                            </button>
+                        </div>
                         <p class="visual-caption">2D Fourier transform — unusual patterns suggest AI generation</p>
                         <div class="chart-container"><canvas id="freq-chart"></canvas></div>
                         <p class="visual-caption">Radial power spectrum profile</p>
@@ -351,7 +363,11 @@
                     </div>
                     <div class="panel-content-actual">
                         <p id="noise-description" class="panel-description"></p>
-                        <div id="noise-map" class="panel-visual"></div>
+                        <div id="noise-map" class="panel-visual">
+                            <button class="btn-zoom-visual" title="Maximize">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                            </button>
+                        </div>
                         <p class="visual-caption">Noise variance map — uniform = consistent = likely real</p>
                     </div>
                 </div>
@@ -440,6 +456,15 @@
     <!-- Application Logic -->
     <script src="three_renderer.js"></script>
     <script src="app.js"></script>
+    <!-- ═══ Zoom Modal ═══ -->
+    <div id="zoom-modal" class="zoom-modal hidden">
+        <div class="zoom-backdrop" id="zoom-backdrop"></div>
+        <div class="zoom-content glass-tilt animate-zoom">
+            <button id="zoom-close" class="zoom-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            <div id="zoom-image-container" class="zoom-image-container"></div>
+            <p id="zoom-caption" class="zoom-caption"></p>
+        </div>
+    </div>
 </body>
 
 </html>
