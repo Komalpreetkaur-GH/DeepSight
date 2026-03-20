@@ -34,21 +34,35 @@ class CNNClassifier:
     def _load_model(self):
         """Lazy-load the model on first use."""
         if self._pipeline is None:
-            print(f"[CNN] Loading model '{self.MODEL_NAME}' on {self._device}...")
-            self._model = AutoModelForImageClassification.from_pretrained(
-                self.MODEL_NAME
-            )
-            self._extractor = AutoImageProcessor.from_pretrained(self.MODEL_NAME)
-            self._model.to(self._device)
-            self._model.eval()
+            try:
+                print(f"[CNN] Loading model '{self.MODEL_NAME}' on {self._device}...")
+                # Check if timm is available (often needed for SigLip)
+                try:
+                    import timm
+                    print(f"[CNN] timm version: {timm.__version__}")
+                except ImportError:
+                    print("[CNN] WARNING: timm not found. Vision models might fail.")
 
-            self._pipeline = pipeline(
-                "image-classification",
-                model=self._model,
-                image_processor=self._extractor,
-                device=0 if self._device == "cuda" else -1,
-            )
-            print("[CNN] Model loaded successfully.")
+                self._model = AutoModelForImageClassification.from_pretrained(
+                    self.MODEL_NAME,
+                    trust_remote_code=True
+                )
+                self._extractor = AutoImageProcessor.from_pretrained(self.MODEL_NAME)
+                self._model.to(self._device)
+                self._model.eval()
+
+                self._pipeline = pipeline(
+                    "image-classification",
+                    model=self._model,
+                    image_processor=self._extractor,
+                    device=0 if self._device == "cuda" else -1,
+                )
+                print("[CNN] Model loaded successfully.")
+            except Exception as e:
+                print(f"[CNN] CRITICAL: Model loading failed: {e}")
+                import traceback
+                traceback.print_exc()
+                raise e
 
     def analyze(self, image: Image.Image) -> dict:
         """

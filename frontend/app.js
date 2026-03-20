@@ -660,19 +660,11 @@ function renderResults(data) {
     showSection("results");
     
     const panels = $$(".panel");
-    const revealItems = $$(".reveal-item");
     
-    // 1. Reset reveal animations, show skeletons, and collapse deep dive
-    revealItems.forEach(item => item.classList.remove("reveal-active"));
+    // 1. Show skeletons
     panels.forEach(p => p.classList.add("loading-skeleton"));
 
-
-    // 2. Trigger reveal sequence
-    requestAnimationFrame(() => {
-        revealItems.forEach(item => item.classList.add("reveal-active"));
-    });
-
-    // 3. Populate data (verdict is usually shown first)
+    // 2. Populate data (verdict is usually shown first)
     const { analyzers, verdict, total_time_ms, image_size } = data;
     renderVerdict(verdict, total_time_ms, image_size);
 
