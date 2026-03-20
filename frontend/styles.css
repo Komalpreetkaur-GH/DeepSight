@@ -2584,8 +2584,33 @@ img {
     gap: 2rem;
 }
 
+
 .splash-logo-container {
+    position: relative;
+    padding: 24px;
     filter: drop-shadow(0 0 15px rgba(0, 188, 235, 0.4));
+    overflow: hidden;
+}
+
+/* Radar scan effect */
+.splash-logo-container::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--aqua);
+    box-shadow: 0 0 20px 5px var(--aqua);
+    opacity: 0.6;
+    animation: radar-scan 3s linear infinite;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes radar-scan {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(200px); }
 }
 
 .splash-logo {
@@ -2593,18 +2618,36 @@ img {
 }
 
 .splash-outer {
-    animation: splash-spin 8s linear infinite;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
     transform-origin: center;
+    animation: draw-svg 2s forwards cubic-bezier(0.4, 0, 0.2, 1), splash-spin 8s linear infinite 2s;
 }
 
 .splash-inner {
-    animation: splash-spin-reverse 12s linear infinite;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
     transform-origin: center;
+    animation: draw-svg 1.5s forwards cubic-bezier(0.4, 0, 0.2, 1) 0.5s, splash-spin-reverse 12s linear infinite 2s;
+}
+
+.splash-core {
+    transform: scale(0);
+    transform-origin: center;
+    animation: pop-core 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.8s;
+}
+
+@keyframes draw-svg {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes pop-core {
+    to { transform: scale(1); }
 }
 
 @keyframes splash-pulse {
-    0% { transform: scale(0.9); opacity: 0.8; }
-    100% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 25px rgba(0, 188, 235, 0.8)); }
+    0% { transform: scale(0.95); opacity: 0.8; }
+    100% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 30px rgba(0, 188, 235, 0.8)); }
 }
 
 @keyframes splash-spin {
@@ -2617,6 +2660,7 @@ img {
 
 .splash-text-container {
     text-align: center;
+    position: relative;
 }
 
 .splash-title {
@@ -2627,6 +2671,18 @@ img {
     color: #fff;
     margin-bottom: 0.5rem;
     text-shadow: 0 0 20px rgba(0, 188, 235, 0.6);
+    /* Glitch initialization */
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    animation: glitch-reveal 2s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+@keyframes glitch-reveal {
+    0% { transform: translateY(20px); opacity: 0; clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
+    20% { opacity: 1; clip-path: polygon(0 80%, 100% 20%, 100% 100%, 0 100%); transform: translateX(-5px); }
+    40% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: translateX(5px); }
+    60% { transform: translateX(-2px); filter: hue-rotate(90deg); }
+    80% { transform: translateX(2px); filter: hue-rotate(-90deg); }
+    100% { transform: translateY(0); opacity: 1; filter: none; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
 }
 
 .splash-subtitle {
@@ -2635,28 +2691,46 @@ img {
     color: var(--aqua);
     letter-spacing: 4px;
     opacity: 0.8;
+    display: inline-block;
+    /* Typewriter bounds */
+    clip-path: inset(0 100% 0 0);
+    animation: typewriter 2s steps(30) 1s forwards;
+}
+
+@keyframes typewriter {
+    to { clip-path: inset(0 0 0 0); }
 }
 
 .splash-progress {
-    width: 240px;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.1);
+    width: 280px;
+    height: 4px;
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.05) 4px,
+        transparent 4px,
+        transparent 8px
+    );
     position: relative;
-    overflow: hidden;
     margin-top: 1rem;
+    box-shadow: 0 0 10px rgba(0, 188, 235, 0.1);
 }
 
 .splash-progress-bar {
     position: absolute;
     top: 0; left: 0; height: 100%;
     background: var(--aqua);
-    box-shadow: 0 0 10px var(--aqua);
-    animation: splash-fill 4.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    box-shadow: 0 0 15px var(--aqua), 0 0 5px #fff;
+    -webkit-mask-image: repeating-linear-gradient(90deg, #000, #000 4px, transparent 4px, transparent 8px);
+    width: 0%;
+    animation: splash-fill-segments 3s cubic-bezier(0.1, 0.8, 0.3, 1) 1.2s forwards;
 }
 
-@keyframes splash-fill {
+@keyframes splash-fill-segments {
     0% { width: 0%; }
-    50% { width: 60%; }
+    20% { width: 30%; }
+    40% { width: 45%; }
+    60% { width: 80%; }
     80% { width: 85%; }
     100% { width: 100%; }
 }
