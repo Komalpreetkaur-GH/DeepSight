@@ -665,7 +665,7 @@ function renderResults(data) {
     // 1. Reset reveal animations, show skeletons, and collapse deep dive
     revealItems.forEach(item => item.classList.remove("reveal-active"));
     panels.forEach(p => p.classList.add("loading-skeleton"));
-    resetDeepDive();
+
 
     // 2. Trigger reveal sequence
     requestAnimationFrame(() => {
@@ -1103,37 +1103,7 @@ function initTiltEffect() {
 }
 
 // ── Progressive Disclosure Logic ───────────────────────────────
-function initDeepDive() {
-    const btn = document.getElementById("btn-deep-dive");
-    const grid = document.getElementById("panels-grid");
-    
-    if (!btn || !grid) return;
-    
-    btn.addEventListener("click", () => {
-        const isExpanded = grid.classList.contains("expanded");
-        if (isExpanded) {
-            grid.classList.remove("expanded");
-            grid.classList.add("collapsed");
-            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg> Show Detailed Forensic Analysis`;
-        } else {
-            grid.classList.remove("collapsed");
-            grid.classList.add("expanded");
-            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="18 15 12 9 6 15"/></svg> Hide Detailed Analysis`;
-        }
-    });
-}
 
-function resetDeepDive() {
-    const btn = document.getElementById("btn-deep-dive");
-    const grid = document.getElementById("panels-grid");
-    if (grid) {
-        grid.classList.remove("expanded");
-        grid.classList.add("collapsed");
-    }
-    if (btn) {
-        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg> Show Detailed Forensic Analysis`;
-    }
-}
 
 // ── Liquid Particle Background ──────────────────────────────────
 function initLiquidParticles() {
@@ -1214,7 +1184,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateHistoryBadge();
     initInteractions();
     initTiltEffect();
-    initDeepDive();
     initLiquidParticles();
     
     // Smooth scroll for nav links if added later

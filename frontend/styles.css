@@ -330,38 +330,6 @@ img {
     display: none;
 }
 
-/* â”€â”€ Progressive Disclosure ───────────────────────────────── */
-.disclosure-controls {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0 40px;
-}
-
-.panels-grid.collapsed {
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-    margin-top: -20px;
-}
-
-.panels-grid.expanded {
-    max-height: 5000px; /* High enough for all panels */
-    overflow: visible;
-    opacity: 1;
-    pointer-events: auto;
-    margin-top: 0;
-}
-
-#btn-deep-dive svg {
-    transition: transform 0.4s;
-}
-
-.expanded #btn-deep-dive svg {
-    transform: rotate(180deg);
-}
-
 /* Content layer to ensure text readability */
 .top-nav > *,
 .logo-badge > *,
@@ -372,6 +340,13 @@ img {
 .panel > * {
     position: relative;
     z-index: 2;
+}
+
+.panels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
 }
 
 /* â”€â”€ Interactive Liquid Ripple â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
