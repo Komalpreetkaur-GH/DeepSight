@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.pyo
+.git
+.gitignore
+.env
+*.md
+docs/
+.vscode/
+.idea/
+*.egg-info
+dist/
+build/
+node_modules/
+test_*.py
+.antigravityignore
