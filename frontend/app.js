@@ -645,18 +645,18 @@ function renderCompareChart() {
                 {
                     label: compareDataA.filename || "Image A",
                     data: dataA,
-                    backgroundColor: "rgba(6, 214, 160, 0.6)",
-                    borderColor: "rgba(6, 214, 160, 1)",
+                    backgroundColor: "rgba(150, 150, 150, 0.6)",
+                    borderColor: "rgba(150, 150, 150, 1)",
                     borderWidth: 1,
-                    borderRadius: 4,
+                    borderRadius: 0,
                 },
                 {
                     label: compareDataB.filename || "Image B",
                     data: dataB,
-                    backgroundColor: "rgba(224, 64, 251, 0.6)",
-                    borderColor: "rgba(224, 64, 251, 1)",
+                    backgroundColor: "rgba(80, 80, 80, 0.6)",
+                    borderColor: "rgba(80, 80, 80, 1)",
                     borderWidth: 1,
-                    borderRadius: 4,
+                    borderRadius: 0,
                 },
             ],
         },
@@ -664,13 +664,13 @@ function renderCompareChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { labels: { color: "#8888a0", font: { size: 11 } } },
+                legend: { labels: { color: "#888888", font: { size: 11 } } },
             },
             scales: {
-                x: { ticks: { color: "#55556a" }, grid: { color: "rgba(255,255,255,0.03)" } },
+                x: { ticks: { color: "#555555" }, grid: { color: "rgba(255,255,255,0.03)" } },
                 y: {
                     beginAtZero: true, max: 100,
-                    ticks: { color: "#55556a", callback: (v) => v + "%" },
+                    ticks: { color: "#555555", callback: (v) => v + "%" },
                     grid: { color: "rgba(255,255,255,0.03)" },
                 },
             },
@@ -766,7 +766,7 @@ function renderCNN(data) {
     dom.cnnDescription.textContent = data.description;
     if (data.gradcam_b64) {
         if (typeof render3DHeatmap === "function") {
-            render3DHeatmap("cnn-gradcam", data.gradcam_b64, 0x32ade6);
+            render3DHeatmap("cnn-gradcam", data.gradcam_b64, 0x666666);
         } else {
             dom.cnnGradcam.innerHTML = `<img src="data:image/png;base64,${data.gradcam_b64}" alt="Grad-CAM">`;
         }
@@ -801,7 +801,7 @@ function renderFrequencyChart(profileData) {
             labels: profileData.map((d) => d.frequency),
             datasets: [{
                 label: "Radial Power", data: profileData.map((d) => d.power),
-                borderColor: "#818cf8", backgroundColor: "rgba(129, 140, 248, 0.1)",
+                borderColor: "#666666", backgroundColor: "rgba(100, 100, 100, 0.1)",
                 borderWidth: 1.5, fill: true, tension: 0.3, pointRadius: 0,
             }],
         },
@@ -1155,7 +1155,7 @@ function initLiquidParticles() {
         draw() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(50, 173, 230, ${this.alpha})`;
+            ctx.fillStyle = `rgba(150, 150, 150, ${this.alpha})`;
             ctx.fill();
         }
     }
