@@ -21,7 +21,7 @@ short_description: AI-powered deepfake forensics toolkit
 
 **AI-powered image forensic analysis that detects deepfakes and explains _exactly why_ an image is fake.**
 
-[Live Demo](#) · [How It Works](#-how-it-works) · [Quick Start](#-quick-start) · [Features](#-features) · [SRS](SRS.md)
+[Live Demo](https://komalsohal-specula.hf.space/) · [How It Works](#-how-it-works) · [Quick Start](#-quick-start) · [Features](#-features) · [SRS](SRS.md)
 
 </div>
 
