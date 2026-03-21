@@ -442,31 +442,44 @@ function renderBatchResults(results) {
 
 // ── PDF Report ──────────────────────────────────────────────────
 dom.downloadPdfBtn.addEventListener("click", async () => {
-    if (!selectedFile && !currentAnalysisData) return;
+    if (!currentAnalysisData) return;
+    
     dom.downloadPdfBtn.textContent = "Generating PDF...";
     dom.downloadPdfBtn.disabled = true;
 
     try {
-        // Re-send the file to the report endpoint
         const formData = new FormData();
+        
+        // 1. Send the analysis results as JSON
+        formData.append("results_json", JSON.stringify(currentAnalysisData));
+        
+        // 2. Attach the original file if we have it (for better report quality)
         if (selectedFile) {
             formData.append("file", selectedFile);
-        } else {
-            // If no file (loaded from history), we can't regenerate
-            dom.downloadPdfBtn.textContent = "Download PDF Report";
-            dom.downloadPdfBtn.disabled = false;
-            alert("PDF export requires the original image file. Please re-upload the image.");
-            return;
         }
 
-        const response = await fetch("/api/report", { method: "POST", body: formData });
-        if (!response.ok) throw new Error("PDF generation failed");
+        const response = await fetch("/api/report", { 
+            method: "POST", 
+            body: formData 
+        });
+        
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({ detail: "PDF generation failed" }));
+            throw new Error(err.detail || "PDF generation failed");
+        }
 
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `Specula_Report_${currentAnalysisData?.filename || "analysis"}.pdf`;
+        
+        let reportFilename = "Specula_Report";
+        if (currentAnalysisData.filename) {
+            const baseName = currentAnalysisData.filename.split('.')[0];
+            reportFilename = `Specula_Report_${baseName}`;
+        }
+        
+        a.download = `${reportFilename}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

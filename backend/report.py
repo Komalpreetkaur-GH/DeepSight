@@ -23,6 +23,13 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
 def _b64_to_image(b64_str: str, max_width=450, max_height=250) -> Image:
     """Convert a base64-encoded PNG to a reportlab Image object."""
+    if not b64_str:
+        raise ValueError("Empty base64 string")
+        
+    # Strip data URI prefix if present
+    if "," in b64_str:
+        b64_str = b64_str.split(",")[1]
+        
     img_data = base64.b64decode(b64_str)
     img_buf = io.BytesIO(img_data)
 
@@ -35,12 +42,13 @@ def _b64_to_image(b64_str: str, max_width=450, max_height=250) -> Image:
     return Image(img_buf, width=w * ratio, height=h * ratio)
 
 
-def generate_report(analysis_data: dict) -> bytes:
+def generate_report(analysis_data: dict, image_to_embed=None) -> bytes:
     """
     Generate a PDF forensic report from analysis results.
 
     Args:
         analysis_data: The full analysis result dict from the pipeline
+        image_to_embed: Optional PIL Image object of the original image
 
     Returns:
         PDF file contents as bytes
@@ -49,7 +57,7 @@ def generate_report(analysis_data: dict) -> bytes:
     doc = SimpleDocTemplate(
         buf,
         pagesize=A4,
-        topMargin=30 * mm,
+        topMargin=20 * mm,
         bottomMargin=20 * mm,
         leftMargin=20 * mm,
         rightMargin=20 * mm,
@@ -110,7 +118,7 @@ def generate_report(analysis_data: dict) -> bytes:
     elements = []
 
     # ── Title Page ──
-    elements.append(Spacer(1, 40))
+    elements.append(Spacer(1, 20))
     elements.append(Paragraph("🔍 Specula", styles["ReportTitle"]))
     elements.append(Paragraph("Forensic Analysis Report", styles["ReportSubtitle"]))
     elements.append(Spacer(1, 10))
@@ -141,6 +149,21 @@ def generate_report(analysis_data: dict) -> bytes:
     ]))
     elements.append(info_table)
     elements.append(Spacer(1, 20))
+
+    # ── Original Image Embed ──
+    if image_to_embed:
+        elements.append(Paragraph("ORIGINAL IMAGE", styles["SectionHeader"]))
+        img_io = io.BytesIO()
+        image_to_embed.save(img_io, format='PNG')
+        img_io.seek(0)
+        
+        # Scale original image
+        w, h = image_to_embed.size
+        max_w, max_h = 450, 300
+        ratio = min(max_w/w, max_h/h, 1.0)
+        
+        elements.append(Image(img_io, width=w*ratio, height=h*ratio))
+        elements.append(Spacer(1, 20))
 
     # ── Verdict ──
     verdict = analysis_data.get("verdict", {})
@@ -221,7 +244,8 @@ def generate_report(analysis_data: dict) -> bytes:
                 img = _b64_to_image(data[img_key])
                 elements.append(Spacer(1, 6))
                 elements.append(img)
-            except Exception:
+            except Exception as e:
+                print(f"[Report] Image conversion failed for {key}: {e}")
                 pass
 
         # Metadata-specific: flags

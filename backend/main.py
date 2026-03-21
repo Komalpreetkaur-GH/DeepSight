@@ -9,7 +9,7 @@ and the web frontend.
 import io
 import json
 import numpy as np
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -182,40 +182,78 @@ async def analyze_batch(files: list[UploadFile] = File(...)):
 
 
 @app.post("/api/report")
-async def generate_report_endpoint(file: UploadFile = File(...)):
+async def generate_report_endpoint(
+    file: UploadFile = File(None),
+    results_json: str = Form(None)
+):
     """
-    Upload an image, analyze it, and return a PDF forensic report.
+    Generate a PDF forensic report.
+    Can either re-analyze an uploaded file OR use pre-computed results_json.
     """
     from .report import generate_report
     from fastapi.responses import StreamingResponse
+    import json
 
     try:
-        contents = await file.read()
-        image = Image.open(io.BytesIO(contents))
-        image.load()
+        analysis_data = None
+        image_to_embed = None
 
-        MAX_DIM = 2048
-        if max(image.size) > MAX_DIM:
-            ratio = MAX_DIM / max(image.size)
-            new_size = (int(image.size[0] * ratio), int(image.size[1] * ratio))
-            image = image.resize(new_size, Image.LANCZOS)
+        # Case 1: Pre-computed results provided
+        if results_json:
+            try:
+                analysis_data = json.loads(results_json)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Invalid results_json: {str(e)}")
 
-        results = pipeline.analyze(image)
+        # Case 2: No results provided, must analyze the file
+        if not analysis_data:
+            if not file:
+                raise HTTPException(status_code=400, detail="Either file or results_json must be provided.")
+            
+            contents = await file.read()
+            image = Image.open(io.BytesIO(contents))
+            image.load()
 
-        analysis_data = sanitize_for_json({
-            "filename": file.filename,
-            "image_size": {"width": image.size[0], "height": image.size[1]},
-            **results,
-        })
+            MAX_DIM = 2048
+            if max(image.size) > MAX_DIM:
+                ratio = MAX_DIM / max(image.size)
+                new_size = (int(image.size[0] * ratio), int(image.size[1] * ratio))
+                image = image.resize(new_size, Image.LANCZOS)
 
-        pdf_bytes = generate_report(analysis_data)
+            results = pipeline.analyze(image)
+            analysis_data = sanitize_for_json({
+                "filename": file.filename,
+                "image_size": {"width": image.size[0], "height": image.size[1]},
+                **results,
+            })
+            
+            # For re-analyzed files, we have the PIL image ready to embed
+            image_to_embed = image
+        
+        # If we have a file but also results_json, we can still use the file for a high-res embed
+        elif file:
+            try:
+                contents = await file.read()
+                image_to_embed = Image.open(io.BytesIO(contents))
+                image_to_embed.load()
+            except:
+                pass # Non-critical if file is corrupt during "quick" report
+
+        # Generate PDF
+        pdf_bytes = generate_report(analysis_data, image_to_embed=image_to_embed)
+
+        filename = analysis_data.get("filename", "analysis")
+        if not filename.endswith(".pdf"):
+            filename = f"Specula_Report_{filename}.pdf"
 
         return StreamingResponse(
             io.BytesIO(pdf_bytes),
             media_type="application/pdf",
-            headers={"Content-Disposition": f'attachment; filename="Specula_Report_{file.filename}.pdf"'},
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
 
 
