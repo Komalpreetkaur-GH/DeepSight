@@ -830,8 +830,8 @@ img {
 
 .btn-analyze:hover {
     transform: translateY(-1px);
-    background: #003a54; /* Darker blue for hover */
-    box-shadow: 0 4px 12px rgba(0, 80, 115, 0.2);
+    background: #222222; /* Darker grey for hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .btn-reset {
@@ -2413,9 +2413,9 @@ img {
 }
 
 .btn-zoom-action:hover {
-    background: var(--aqua);
+    background: var(--text-primary);
     transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(0, 188, 235, 0.4);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
 .zoom-in { order: 1; }
@@ -2499,7 +2499,7 @@ img {
     border-color: var(--indigo);
     color: var(--indigo);
     transform: translateY(-3px);
-    box-shadow: 0 20px 40px rgba(0, 80, 115, 0.15);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .btn-new-analysis svg {
@@ -2565,7 +2565,7 @@ img {
 .splash-logo-container {
     position: relative;
     padding: 24px;
-    filter: drop-shadow(0 0 15px rgba(0, 188, 235, 0.4));
+    filter: drop-shadow(0 0 15px rgba(100, 100, 100, 0.4));
     overflow: hidden;
 }
 
@@ -2577,8 +2577,8 @@ img {
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--aqua);
-    box-shadow: 0 0 20px 5px var(--aqua);
+    background: var(--border-accent);
+    box-shadow: 0 0 20px 5px var(--border-accent);
     opacity: 0.6;
     animation: radar-scan 3s linear infinite;
     pointer-events: none;
@@ -2648,7 +2648,7 @@ img {
     letter-spacing: 12px;
     color: #fff;
     margin-bottom: 0.5rem;
-    text-shadow: 0 0 20px rgba(0, 188, 235, 0.6);
+    text-shadow: 0 0 20px rgba(100, 100, 100, 0.6);
     /* Glitch initialization */
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     animation: glitch-reveal 2s cubic-bezier(0.77, 0, 0.175, 1) forwards;
