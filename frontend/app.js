@@ -468,6 +468,8 @@ dom.downloadPdfBtn.addEventListener("click", async () => {
         a.href = url;
         a.download = `Specula_Report_${currentAnalysisData?.filename || "analysis"}.pdf`;
         document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
     } catch (e) {
         alert(`PDF generation failed: ${e.message}`);
