@@ -21,7 +21,7 @@ short_description: AI-powered deepfake forensics toolkit
 
 **AI-powered image forensic analysis that detects deepfakes and explains _exactly why_ an image is fake.**
 
-[Live Demo](#) · [How It Works](#-how-it-works) · [Quick Start](#-quick-start) · [Features](#-features)
+[Live Demo](#) · [How It Works](#-how-it-works) · [Quick Start](#-quick-start) · [Features](#-features) · [SRS](SRS.md)
 
 </div>
 
@@ -164,8 +164,9 @@ Specula/
 │   ├── index.html            # Single-page app
 │   ├── styles.css            # Full design system
 │   └── app.js                # All frontend logic
-├── docs/                     # Screenshots
-└── README.md
+├── docs/                     # New UI Screenshots
+├── README.md
+└── SRS.md
 ```
 
 ## 🛠️ Tech Stack
