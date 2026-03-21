@@ -123,49 +123,28 @@ def generate_report(analysis_data: dict, image_to_embed=None) -> bytes:
     elements.append(Paragraph("Forensic Analysis Report", styles["ReportSubtitle"]))
     elements.append(Spacer(1, 10))
 
-    # Date & file info
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    filename = analysis_data.get("filename", "Unknown")
-    img_size = analysis_data.get("image_size", {})
-    dims = f"{img_size.get('width', '?')} × {img_size.get('height', '?')}"
-    time_ms = analysis_data.get("total_time_ms", 0)
+    # Removed metadata subtitle as requested
 
-    info_data = [
-        ["File", filename],
-        ["Dimensions", dims],
-        ["Analysis Time", f"{time_ms / 1000:.1f}s"],
-        ["Report Date", now],
-    ]
-    info_table = Table(info_data, colWidths=[100, 350])
-    info_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#1a1a2e")),
-        ("TEXTCOLOR", (0, 0), (0, -1), colors.HexColor("#8888a0")),
-        ("TEXTCOLOR", (1, 0), (1, -1), colors.white),
-        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 9),
-        ("PADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#333355")),
-    ]))
-    elements.append(info_table)
-    elements.append(Spacer(1, 20))
-
-    # ── Original Image Embed ──
+    # ── Original Image (Evidence) ──
+    # Even if not prominent on the UI results page, a forensics report needs the evidence.
+    # I'll keep it but make it look like part of a "Source Image" section if needed, 
+    # or just show it at the top as the analyzed subject.
     if image_to_embed:
-        elements.append(Paragraph("ORIGINAL IMAGE", styles["SectionHeader"]))
+        elements.append(Paragraph("ANALYZED SUBJECT", styles["SectionHeader"]))
         img_io = io.BytesIO()
         image_to_embed.save(img_io, format='PNG')
         img_io.seek(0)
         
-        # Scale original image
         w, h = image_to_embed.size
-        max_w, max_h = 450, 300
+        max_w, max_h = 450, 220
         ratio = min(max_w/w, max_h/h, 1.0)
         
-        elements.append(Image(img_io, width=w*ratio, height=h*ratio))
-        elements.append(Spacer(1, 20))
+        img_obj = Image(img_io, width=w*ratio, height=h*ratio)
+        img_obj.hAlign = 'CENTER'
+        elements.append(img_obj)
+        elements.append(Spacer(1, 15))
 
-    # ── Verdict ──
+    # ── Verdict Banner (Match UI) ──
     verdict = analysis_data.get("verdict", {})
     v_label = verdict.get("label", "UNKNOWN")
     v_score = verdict.get("score", 0)
@@ -173,23 +152,34 @@ def generate_report(analysis_data: dict, image_to_embed=None) -> bytes:
     v_color = verdict.get("color", "#ffffff")
 
     elements.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#333355")))
-    elements.append(Spacer(1, 10))
-    elements.append(Paragraph("VERDICT", styles["SectionHeader"]))
+    elements.append(Spacer(1, 15))
 
-    verdict_data = [[
-        Paragraph(f'<font color="{v_color}" size="18"><b>{v_label}</b></font>', styles["VerdictText"]),
-        Paragraph(f'<font color="{v_color}" size="16"><b>{int(v_score * 100)}%</b></font>', styles["VerdictText"]),
-    ]]
-    verdict_table = Table(verdict_data, colWidths=[350, 100])
+    # Verdict Banner
+    verdict_content = (
+        f'<font color="{v_color}" size="22"><b>{v_label}</b></font><br/>'
+        f'<font color="#8888a0" size="14">AI Confidence Score: </font>'
+        f'<font color="{v_color}" size="16"><b>{int(v_score * 100)}%</b></font>'
+    )
+    
+    verdict_table = Table([[Paragraph(verdict_content, styles["VerdictText"])]], colWidths=[450])
     verdict_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#12121a")),
-        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor(v_color)),
-        ("PADDING", (0, 0), (-1, -1), 14),
+        ("BOX", (0, 0), (-1, -1), 2.5, colors.HexColor(v_color)),
+        ("TOPPADDING", (0, 0), (-1, -1), 20),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 20),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
     ]))
+    
     elements.append(verdict_table)
-    elements.append(Spacer(1, 8))
+    elements.append(Spacer(1, 12))
     elements.append(Paragraph(v_summary, styles["BodyText2"]))
+    elements.append(Spacer(1, 20))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#333355")))
+    elements.append(Spacer(1, 20))
+
+    # ── Forensic Analyzer Panels (Match UI) ──
+    elements.append(Paragraph("DETAILED ANALYSIS PANELS", styles["SectionHeader"]))
     elements.append(Spacer(1, 10))
 
     # ── Per-Analyzer Sections ──
