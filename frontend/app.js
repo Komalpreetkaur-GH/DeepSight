@@ -451,7 +451,8 @@ dom.downloadPdfBtn.addEventListener("click", async () => {
         const formData = new FormData();
         
         // 1. Send the analysis results as JSON
-        formData.append("results_json", JSON.stringify(currentAnalysisData));
+        const resultsBlob = new Blob([JSON.stringify(currentAnalysisData)], { type: 'application/json' });
+        formData.append("results_file", resultsBlob, "results.json");
         
         // 2. Attach the original file if we have it (for better report quality)
         if (selectedFile) {

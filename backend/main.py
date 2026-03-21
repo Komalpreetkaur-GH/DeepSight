@@ -184,7 +184,7 @@ async def analyze_batch(files: list[UploadFile] = File(...)):
 @app.post("/api/report")
 async def generate_report_endpoint(
     file: UploadFile = File(None),
-    results_json: str = Form(None)
+    results_file: UploadFile = File(None)
 ):
     """
     Generate a PDF forensic report.
@@ -198,12 +198,13 @@ async def generate_report_endpoint(
         analysis_data = None
         image_to_embed = None
 
-        # Case 1: Pre-computed results provided
-        if results_json:
+        # Case 1: Pre-computed results provided as a file
+        if results_file:
             try:
-                analysis_data = json.loads(results_json)
+                content = await results_file.read()
+                analysis_data = json.loads(content)
             except Exception as e:
-                raise HTTPException(status_code=400, detail=f"Invalid results_json: {str(e)}")
+                raise HTTPException(status_code=400, detail=f"Invalid results_file: {str(e)}")
 
         # Case 2: No results provided, must analyze the file
         if not analysis_data:
