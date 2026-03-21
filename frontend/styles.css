@@ -23,6 +23,7 @@
     --amber: #f9ab00;
     --green: #188038;
     --indigo: #444444;
+    --logo-blue: #005073;
     --glass-bg: rgba(255, 255, 255, 0.95);
     --glass-border: #e1e8ed;
     --glass-blur: blur(0px);
@@ -70,6 +71,7 @@
     --tab-bg: #0a0a0a;
     --tab-active-bg: #161616;
     --panel-bg: #0f0f0f;
+    --logo-blue: #00bceb; /* Brighter blue for dark mode visibility */
 }
 
 /* â”€â”€ Reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -542,7 +544,7 @@ img {
 }
 
 .logo-icon {
-    color: var(--indigo);
+    color: var(--logo-blue);
     display: flex;
 }
 
@@ -2314,15 +2316,18 @@ img {
 /* ── Specula Logo Animation ────────────────────────────── */
 .specula-logo {
     overflow: visible;
+    color: var(--logo-blue);
 }
 
 .specula-logo .specula-inner {
     transform-origin: 50% 50%;
+    stroke: var(--logo-blue);
     animation: specula-spin 12s linear infinite;
 }
 
 .specula-logo .specula-core {
     transform-origin: 50% 50%;
+    fill: var(--logo-blue);
     animation: specula-pulse 2.5s ease-in-out infinite alternate;
 }
 
@@ -2331,8 +2336,8 @@ img {
 }
 
 @keyframes specula-pulse {
-    0% { transform: scale(0.85); opacity: 0.7; filter: drop-shadow(0 0 2px var(--indigo)); }
-    100% { transform: scale(1.4); opacity: 1; filter: drop-shadow(0 0 6px var(--teal)); }
+    0% { transform: scale(0.85); opacity: 0.7; filter: drop-shadow(0 0 2px var(--logo-blue)); }
+    100% { transform: scale(1.4); opacity: 1; filter: drop-shadow(0 0 6px var(--logo-blue)); }
 }
 
 /* ── 3D Heatmap & Visual Alignment ───────────────────────────── */
@@ -2586,6 +2591,7 @@ img {
 }
 
 .splash-logo {
+    color: var(--logo-blue);
     animation: splash-pulse 2s ease-in-out infinite alternate;
 }
 
@@ -2619,7 +2625,7 @@ img {
 
 @keyframes splash-pulse {
     0% { transform: scale(0.95); opacity: 0.8; }
-    100% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 30px rgba(0, 188, 235, 0.8)); }
+    100% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 30px var(--logo-blue)); }
 }
 
 @keyframes splash-spin {
