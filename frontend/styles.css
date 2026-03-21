@@ -31,9 +31,9 @@
     --glass-inner-shadow: none;
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
-    --radius-lg: 4px;
+    --radius-lg: 0px;
     --radius-sm: 0px;
-    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition: all 0.2s ease-out;
     
     /* Semantic Clinical Tokens */
     --nav-bg: #ffffff;
@@ -46,34 +46,30 @@
 }
 
 [data-theme="dark"] {
-    --bg-primary: #050608;
-    --bg-secondary: #0a0c10;
-    --bg-card: rgba(20, 22, 28, 0.5);
-    --bg-card-hover: rgba(30, 32, 40, 0.7);
-    --border: rgba(255, 255, 255, 0.05);
-    --border-accent: #00bceb;
+    --bg-primary: #0b0d11;
+    --bg-secondary: #0f1218;
+    --bg-card: #14171d;
+    --bg-card-hover: #1b1f27;
+    --border: #242933;
+    --border-accent: #0088cc;
     --text-primary: #f5f7f9;
-    --text-secondary: #c7c7cc;
-    --text-muted: #8e8e93;
-    --glass-bg: rgba(10, 12, 18, 0.5);
-    --glass-border: rgba(255, 255, 255, 0.06);
-    --glass-blur: blur(40px) saturate(220%) contrast(105%);
-    --glass-glow: 0 0 60px rgba(50, 173, 230, 0.25);
-    --glass-shadow: 
-        0 16px 64px rgba(0, 0, 0, 0.8),
-        0 8px 24px rgba(0, 0, 0, 0.6);
-    --glass-inner-shadow: 
-        inset 0 1px 1px rgba(255, 255, 255, 0.05),
-        inset 0 -1px 1px rgba(0, 0, 0, 0.5);
+    --text-secondary: #aeb5be;
+    --text-muted: #6b7684;
+    --glass-bg: #14171d;
+    --glass-border: #242933;
+    --glass-blur: blur(0px);
+    --glass-glow: none;
+    --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --glass-inner-shadow: none;
 
     /* Semantic Overrides */
-    --nav-bg: rgba(10, 12, 18, 0.75);
-    --nav-border: rgba(255, 255, 255, 0.05);
-    --input-bg: rgba(0, 0, 0, 0.4);
-    --input-border: rgba(50, 173, 230, 0.15);
-    --tab-bg: rgba(15, 17, 23, 0.6);
-    --tab-active-bg: rgba(40, 42, 50, 0.8);
-    --panel-bg: rgba(15, 17, 23, 0.45);
+    --nav-bg: #101319;
+    --nav-border: #242933;
+    --input-bg: #07080a;
+    --input-border: #2d343f;
+    --tab-bg: #0f1218;
+    --tab-active-bg: #1b1f27;
+    --panel-bg: #14171d;
 }
 
 /* â”€â”€ Reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -140,7 +136,11 @@ img {
     inset: 0;
     width: 100%;
     height: 100%;
-    opacity: 0.35;
+    opacity: 0.15; /* Subdued */
+}
+
+[data-theme="dark"] #particle-canvas {
+    display: none; /* Forensic look: no distractions */
 }
 
 .orb {
@@ -211,7 +211,7 @@ img {
     box-shadow: var(--glass-shadow), var(--glass-inner-shadow);
 }
 
-/* Internal Volumetric Glow - The "Trapped Light" effect */
+/* Remove volumetric glows for forensic mode */
 .top-nav::after,
 .logo-badge::after,
 .upload-zone::after,
@@ -220,21 +220,7 @@ img {
 .verdict-banner::after,
 .panel::after,
 .glass-tilt::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-        circle at 30% 30%,
-        rgba(50, 173, 230, 0.12) 0%,
-        rgba(48, 209, 190, 0.08) 30%,
-        rgba(255, 255, 255, 0) 70%
-    );
-    pointer-events: none;
-    z-index: 0;
-    mix-blend-mode: soft-light;
+    display: none;
 }
 
 /* â”€â”€ Interactive 3D Glass Tilt ─────────────────────────────────── */
@@ -245,25 +231,9 @@ img {
     transition: transform 0.1s ease-out; /* Snap back is faster than tilt */
 }
 
-/* Specular Glint Highlight - High-end light reflection */
+/* Remove specular glint for forensic mode */
 .glass-tilt::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(255, 255, 255, 0.45) 0%,
-        rgba(255, 255, 255, 0) 60%
-    );
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-    z-index: 5;
-    mix-blend-mode: overlay;
-}
-
-.glass-tilt:hover::before {
-    opacity: 1;
+    display: none;
 }
 
 /* â”€â”€ Orchestrated reveal animations ──────────────────────────── */
@@ -383,9 +353,7 @@ img {
 .zoom-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(5, 6, 8, 0.85);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(5, 6, 8, 0.95);
 }
 
 .zoom-content {
@@ -459,27 +427,9 @@ img {
     transform: scale(1) translateY(0);
 }
 
-/* â”€â”€ Interactive Liquid Ripple â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Disable interactive liquid ripple for forensic mode */
 .liquid-ripple {
-    position: absolute;
-    border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    pointer-events: none;
-    background: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.4) 0%,
-        rgba(50, 173, 230, 0.15) 40%,
-        rgba(255, 255, 255, 0) 70%
-    );
-    animation: ripple-animation 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    z-index: 10;
-}
-
-@keyframes ripple-animation {
-    to {
-        transform: translate(-50%, -50%) scale(4);
-        opacity: 0;
-    }
+    display: none;
 }
 
 /* â”€â”€ Top Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -585,11 +535,9 @@ img {
     gap: 10px;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 2px;
+    border-radius: 0px;
     padding: 8px 20px 8px 14px;
     margin-bottom: 24px;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     box-shadow: var(--glass-shadow), var(--glass-inner-shadow);
 }
 
@@ -938,8 +886,6 @@ img {
     cursor: pointer;
     transition: all 0.3s;
     font-family: var(--font-sans);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     box-shadow: var(--glass-shadow), var(--glass-inner-shadow);
 }
 
