@@ -1,14 +1,3 @@
----
-title: Specula
-emoji: 🔍
-colorFrom: indigo
-colorTo: blue
-sdk: docker
-app_port: 7860
-pinned: true
-license: mit
-short_description: AI-powered deepfake forensics toolkit
----
 
 # 🔍 Specula — Deepfake Forensics Toolkit
 
